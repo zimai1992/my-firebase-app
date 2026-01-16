@@ -44,21 +44,15 @@ class MedicineProvider with ChangeNotifier {
   }
 
   List<Medicine> getMorningMedicines() {
-    return _medicines.where((med) {
-      return med.times.any((time) => time.hour < 12);
-    }).toList();
+    return _medicines.where((med) => med.times.any((time) => time.hour < 12)).toList();
   }
 
   List<Medicine> getAfternoonMedicines() {
-    return _medicines.where((med) {
-      return med.times.any((time) => time.hour >= 12 && time.hour < 17);
-    }).toList();
+    return _medicines.where((med) => med.times.any((time) => time.hour >= 12 && time.hour < 17)).toList();
   }
 
   List<Medicine> getEveningMedicines() {
-    return _medicines.where((med) {
-      return med.times.any((time) => time.hour >= 17);
-    }).toList();
+    return _medicines.where((med) => med.times.any((time) => time.hour >= 17)).toList();
   }
 
   bool isMedicineTakenToday(String medicineName) {
@@ -79,12 +73,7 @@ class MedicineProvider with ChangeNotifier {
   Future<void> deleteMedicine(Medicine medicine) async {
     _medicines.removeWhere((m) => m.name == medicine.name);
     if (_user != null) {
-      await _firestore
-          .collection('users')
-          .doc(_user.uid)
-          .collection('medicines')
-          .doc(medicine.name)
-          .delete();
+      await _firestore.collection('users').doc(_user.uid).collection('medicines').doc(medicine.name).delete();
     }
     await _saveMedicines();
     notifyListeners();
@@ -95,8 +84,7 @@ class MedicineProvider with ChangeNotifier {
     if (index != -1) {
       if (_medicines[index].currentStock > 0) {
         _medicines[index].currentStock--;
-        if (_medicines[index].currentStock <=
-            _medicines[index].lowStockThreshold) {
+        if (_medicines[index].currentStock <= _medicines[index].lowStockThreshold) {
           _notificationService.scheduleRefillNotification(medicine);
         }
         await _saveMedicines();
@@ -115,36 +103,16 @@ class MedicineProvider with ChangeNotifier {
   }
 
   Future<void> logMedicine(Medicine medicine) async {
-    final log =
-        MedicineLog(medicineName: medicine.name, timestamp: DateTime.now());
-    _medicineLogs.add(log);
+    final log = MedicineLog(medicineName: medicine.name, timestamp: DateTime.now());
+    _medicineLogs.insert(0, log);
+    await decreaseStock(medicine);
     await _saveMedicineLogs();
     notifyListeners();
   }
 
   Future<void> addCaregiver(String email) async {
-    if (_user == null || _user.email == null) {
-      developer.log('User not logged in or has no email.');
-      return;
-    }
-    if (email == _user.email) {
-      developer.log('Cannot add yourself as a caregiver.');
-      return;
-    }
+    if (_user == null || _user.email == null) return;
     try {
-      final existingInvitation = await _firestore
-          .collection('invitations')
-          .where('patientId', isEqualTo: _user.uid)
-          .where('caregiverEmail', isEqualTo: email)
-          .where('status', whereIn: ['pending', 'accepted'])
-          .limit(1)
-          .get();
-
-      if (existingInvitation.docs.isNotEmpty) {
-        developer.log('Invitation already sent to or accepted by $email.');
-        return;
-      }
-
       final invitation = {
         'patientId': _user.uid,
         'patientName': _user.displayName ?? _user.email,
@@ -154,10 +122,8 @@ class MedicineProvider with ChangeNotifier {
         'createdAt': FieldValue.serverTimestamp(),
       };
       await _firestore.collection('invitations').add(invitation);
-      developer.log('Invitation sent to $email.');
-    } catch (e, s) {
-      developer.log('Error sending caregiver invitation',
-          name: 'myapp.caregiver', error: e, stackTrace: s);
+    } catch (e) {
+      developer.log('Error adding caregiver', error: e);
     }
   }
 
@@ -165,33 +131,20 @@ class MedicineProvider with ChangeNotifier {
     if (_user == null) {
       await _loadCaregiversFromPrefs();
     } else {
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(_user.uid)
-          .collection('caregivers')
-          .get();
-      _caregivers =
-          snapshot.docs.map((doc) => doc.data()['email'] as String).toList();
+      final snapshot = await _firestore.collection('users').doc(_user.uid).collection('caregivers').get();
+      _caregivers = snapshot.docs.map((doc) => doc.data()['email'] as String).toList();
     }
     notifyListeners();
   }
 
   Future<void> _saveMedicines() async {
     if (_user == null) {
-      final medicinesJson =
-          _medicines.map((medicine) => medicine.toJson()).toList();
+      final medicinesJson = _medicines.map((m) => m.toJson()).toList();
       await _prefs.setString('medicines', json.encode(medicinesJson));
     } else {
-      final batch = _firestore.batch();
       for (var medicine in _medicines) {
-        final docRef = _firestore
-            .collection('users')
-            .doc(_user.uid)
-            .collection('medicines')
-            .doc(medicine.name);
-        batch.set(docRef, medicine.toJson());
+        await _firestore.collection('users').doc(_user.uid).collection('medicines').doc(medicine.name).set(medicine.toJson());
       }
-      await batch.commit();
     }
   }
 
@@ -200,16 +153,7 @@ class MedicineProvider with ChangeNotifier {
       final logsJson = _medicineLogs.map((log) => log.toJson()).toList();
       await _prefs.setString('medicine_logs', json.encode(logsJson));
     } else {
-      final batch = _firestore.batch();
-      for (var log in _medicineLogs) {
-        final docRef = _firestore
-            .collection('users')
-            .doc(_user.uid)
-            .collection('medicine_logs')
-            .doc(); // Firestore will auto-generate an ID
-        batch.set(docRef, log.toJson());
-      }
-      await batch.commit();
+      await _firestore.collection('users').doc(_user.uid).collection('medicine_logs').add(_medicineLogs.first.toJson());
     }
   }
 
@@ -217,39 +161,27 @@ class MedicineProvider with ChangeNotifier {
     if (_user == null) {
       await _loadMedicinesFromPrefs();
     } else {
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(_user.uid)
-          .collection('medicines')
-          .get();
-      _medicines =
-          snapshot.docs.map((doc) => Medicine.fromJson(doc.data())).toList();
-      notifyListeners();
+      final snapshot = await _firestore.collection('users').doc(_user.uid).collection('medicines').get();
+      _medicines = snapshot.docs.map((doc) => Medicine.fromJson(doc.data())).toList();
     }
+    notifyListeners();
   }
 
   Future<void> loadMedicineLogs() async {
     if (_user == null) {
       await _loadMedicineLogsFromPrefs();
     } else {
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(_user.uid)
-          .collection('medicine_logs')
-          .orderBy('timestamp', descending: true)
-          .get();
-      _medicineLogs =
-          snapshot.docs.map((doc) => MedicineLog.fromJson(doc.data())).toList();
-      notifyListeners();
+      final snapshot = await _firestore.collection('users').doc(_user.uid).collection('medicine_logs').orderBy('timestamp', descending: true).get();
+      _medicineLogs = snapshot.docs.map((doc) => MedicineLog.fromJson(doc.data())).toList();
     }
+    notifyListeners();
   }
 
   Future<void> _loadMedicinesFromPrefs() async {
     final medicinesString = _prefs.getString('medicines');
     if (medicinesString != null) {
       final medicinesJson = json.decode(medicinesString) as List<dynamic>;
-      _medicines =
-          medicinesJson.map((json) => Medicine.fromJson(json)).toList();
+      _medicines = medicinesJson.map((json) => Medicine.fromJson(json)).toList();
     }
   }
 
@@ -257,8 +189,7 @@ class MedicineProvider with ChangeNotifier {
     final logsString = _prefs.getString('medicine_logs');
     if (logsString != null) {
       final logsJson = json.decode(logsString) as List<dynamic>;
-      _medicineLogs =
-          logsJson.map((json) => MedicineLog.fromJson(json)).toList();
+      _medicineLogs = logsJson.map((json) => MedicineLog.fromJson(json)).toList();
     }
   }
 

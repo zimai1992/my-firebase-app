@@ -472,11 +472,17 @@ abstract class AppLocalizations {
   /// **'English'**
   String get language_english;
 
-  /// No description provided for @language_spanish.
+  /// No description provided for @language_malay.
   ///
   /// In en, this message translates to:
-  /// **'Spanish'**
-  String get language_spanish;
+  /// **'Malay'**
+  String get language_malay;
+
+  /// No description provided for @language_chinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese'**
+  String get language_chinese;
 
   /// No description provided for @settings_title.
   ///

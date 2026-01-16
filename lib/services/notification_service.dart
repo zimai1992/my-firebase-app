@@ -47,8 +47,8 @@ class NotificationService {
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime);
+        // uiLocalNotificationDateInterpretation is removed in newer versions
+    );
   }
 
   Future<void> scheduleRefillNotification(Medicine medicine) async {

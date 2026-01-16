@@ -4,8 +4,19 @@ class CustomCard extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? margin;
+  final EdgeInsetsGeometry? padding;
+  final Color? color;
+  final BoxBorder? border;
 
-  const CustomCard({super.key, required this.child, this.onTap, this.margin});
+  const CustomCard({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.margin,
+    this.padding,
+    this.color,
+    this.border,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,25 +25,19 @@ class CustomCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: margin ??
-            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        margin: margin ?? const EdgeInsets.symmetric(vertical: 8.0),
+        padding: padding,
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
+          color: color ?? Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: border,
           boxShadow: [
             BoxShadow(
               color: isDarkMode
-                  ? Colors.black.withValues(alpha: 0.4)
-                  : Colors.grey.withValues(alpha: 0.2),
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.1),
               blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-            BoxShadow(
-              color: isDarkMode
-                  ? Colors.black.withValues(alpha: 0.2)
-                  : Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              offset: const Offset(0, 4),
             ),
           ],
         ),

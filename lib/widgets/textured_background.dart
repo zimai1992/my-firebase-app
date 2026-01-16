@@ -14,17 +14,19 @@ class TexturedBackground extends StatelessWidget {
             color: Theme.of(context).colorScheme.surface,
           ),
         ),
-        // This container creates a subtle noise texture.
+        // Subtle noise texture disabled temporarily due to corrupted asset
+        /*
         Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage(
-                  'assets/images/noise.png'), // Assuming you have a noise texture image
+                  'assets/images/noise.png'), 
               repeat: ImageRepeat.repeat,
-              opacity: 0.05, // very subtle
+              opacity: 0.05, 
             ),
           ),
         ),
+        */
         child,
       ],
     );

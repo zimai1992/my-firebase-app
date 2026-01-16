@@ -1,76 +1,53 @@
 # Project Blueprint: Medicine Reminder App
 
 ## 1. Overview
-
-This document outlines the architecture, features, and design of the Medicine Reminder application. The app is a comprehensive mobile solution designed to help users manage their medications effectively. It provides features for tracking medicines, receiving timely reminders, managing stock, and offers premium features for advanced users. The application is built with a focus on user experience, clarity, and accessibility.
+This document outlines the architecture, features, and design of the Medicine Reminder application. The app is a comprehensive mobile solution designed to help users manage their medications effectively. It provides features for tracking medicines, receiving timely reminders, managing stock, and offers premium features for advanced users. The application is built with a focus on user experience, clarity, and accessibility, particularly for elderly users or those with chronic conditions.
 
 ## 2. Project Structure & Architecture
-
 The project follows a feature-driven, layered architecture to ensure a clean separation of concerns and maintainability.
 
 - **`lib/`**: Main source code directory.
-  - **`models/`**: Data models (e.g., `Medicine`, `User`).
-  - **`providers/`**: State management (e.g., `MedicineProvider`, `LocaleProvider`).
-  - **`screens/`**: UI for each screen of the application.
+  - **`models/`**: Data models (e.g., `Medicine`, `User`, `MedicineLog`, `Invitation`).
+  - **`providers/`**: State management (e.g., `MedicineProvider`, `LocaleProvider`, `ThemeProvider`).
+  - **`screens/`**: UI for each screen, organized by feature.
   - **`services/`**: Business logic and external services (e.g., `GeminiService`, `NotificationService`).
-  - **`theme/`**: Theming and styling.
+  - **`theme/`**: Centralized theming and styling logic with resilient font loading.
   - **`widgets/`**: Reusable UI components.
-  - **`l10n/`**: Localization files.
-  - **`main.dart`**: Application entry point.
+  - **`l10n/`**: Localization files (arb).
+  - **`main.dart`**: Application entry point with robust initialization.
 
-## 3. Core Features
+## 3. Core Features (Completed)
+- **AI Prescription Scanning**: Uses Gemini Vision to extract medication details from photos.
+- **AI Safety Check**: Uses Gemini to analyze drug-drug interactions between all active medications.
+- **Inventory Management**: Tracks pill counts, logs doses, and alerts when stock is low.
+- **Adherence Tracking**: Visualizes 7-day adherence trends using interactive charts (`fl_chart`).
+- **Caregiver Hub**: Allows family members to monitor patient compliance and log physical visits.
+- **Visit Mode**: A structured checklist for caregivers to use during physical check-ins.
+- **Professional Reports**: Generates detailed PDF health reports for doctors.
+- **Localization**: Supports English, Malay, and Chinese.
 
-The application includes the following features:
+## 4. Technical Details
+- **State Management**: `provider` package.
+- **Backend**: Firebase (Auth, Firestore).
+- **AI**: Google Generative AI (Gemini 1.5 Flash).
+- **Charts**: `fl_chart`.
+- **PDF**: `pdf` and `printing` packages.
+- **Storage**: `shared_preferences` and Firestore.
 
-- **Onboarding (Feature Tour)**: A multi-page tour (`FeatureTourScreen`) introduces new users to the app's key features, with a smooth page indicator for better UX.
-- **User Authentication**: A simple login screen (`LoginScreen`) captures the user's name, which is stored in `SharedPreferences` for a personalized experience.
-- **Medication Management**: Users can add, view, and delete medications. The `HomeScreen` displays a list of medicines, and the `AddMedicineScreen` provides a form for adding new ones.
-- **Prescription Scanning with AI**: The app uses the device camera and AI to scan prescriptions, automatically extracting medication details to simplify adding new medicines.
-- **Stock Management**: The app tracks the number of pills for each medicine, displays a "pills left" count, and shows a "Refill" button when stock is low.
-- **Personalized Experience**: The `HomeScreen` greets the user by name and and displays a summary of their daily medication schedule.
-- **Localization & Internationalization**: The app supports multiple languages (English, Malay, Chinese) using the `intl` package and `.arb` files.
-- **Accessibility**: The app is designed with accessibility in mind, including semantic labels for UI elements.
-- **Premium Features (Paywall)**: A paywall screen (`PaywallScreen`) offers premium features through a subscription model, managed via RevenueCat.
+## 5. Design & Theme (Material 3)
+- **Primary Color**: Deep Medical Teal (`0xFF009688`).
+- **Typography**: Poppins (with system sans-serif fallback for offline/restricted environments).
+- **Visual Effects**: Custom cards with soft shadows and textured backgrounds.
 
-## 4. Caregiver Monitoring
+## 6. Troubleshooting & Environment Notes (IDX/Emulator)
+- **Firebase Auth/Firestore (Android)**: If you see `DEVELOPER_ERROR` or `PERMISSION_DENIED` in the Android emulator:
+    1. Ensure the SHA-1 fingerprint of your debug keystore is added to the Firebase Console.
+    2. To get the SHA-1, run `./gradlew signingReport` in the `android` folder.
+    3. Firestore rules have been optimized for `collectionGroup` queries and caregiver access.
+- **Font Loading**: `google_fonts` may fail in restricted networks (like the IDX emulator). The app handles this gracefully by falling back to system fonts.
+- **Web Preview**: For the most stable development experience in IDX, use the **Web Preview**, which bypasses Android-specific certificate requirements.
 
-This feature allows users to share their medication data with caregivers for monitoring and support.
-
-- **Database Structure**:
-    - A `users` collection in Firestore will store user data.
-    - Each user document will have a `caregivers` subcollection.
-- **UI Updates**:
-    - **Settings Screen**: A "Share My Data" button will generate and display a unique 6-digit code. An "Add Caregiver" button allows the user to add a caregiver by entering their email.
-- **Dashboard**:
-    - A `CaregiverDashboard` will display the medicine logs of the users being monitored.
-
-## 5. Technical Details
-
-- **State Management**: `provider` for dependency injection and state management.
-- **Routing**: `MaterialPageRoute` for basic navigation.
-- **HTTP Client**: `http` for making API calls.
-- **Local Storage**: `shared_preferences` for storing simple key-value data.
-- **Internationalization**: `flutter_localizations` and `intl`.
-- **Firebase**:
-    - `firebase_core`: For initializing Firebase.
-    - `cloud_firestore`: For database operations.
-    - `firebase_auth`: For user authentication.
-- **AI & ML**:
-    - `google_generative_ai`: For interacting with the Gemini API.
-- **Notifications**:
-    - `flutter_local_notifications`: For scheduling and displaying local notifications.
-
-## 6. Design & Theme
-
-The app uses a modern, clean design based on Material Design 3.
-
-- **Colors**: A color scheme generated from a seed color (`Colors.deepPurple`).
-- **Typography**: Custom fonts from the `google_fonts` package (`Oswald`, `Roboto`, `Open Sans`).
-- **Theming**: Centralized `ThemeData` for both light and dark modes.
-- **Layout**: Responsive layouts that adapt to different screen sizes.
-
-## 7. Testing
-
-- **Unit and Widget Testing**: The project includes a suite of unit and widget tests to ensure the correctness of individual components and features.
-- **Mocking**: The `mockito` package is used to create mock objects for dependencies in tests.
-- **Continuous Integration**: Tests are run automatically after every major change to ensure that new features do not break existing functionality.
+## 7. Future Roadmap
+- Integration with smart pillboxes via Bluetooth.
+- Direct pharmacy refill requests.
+- Multi-user profiles for families.

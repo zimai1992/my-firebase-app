@@ -13,7 +13,7 @@ class PaywallScreen extends StatefulWidget {
 }
 
 class PaywallScreenState extends State<PaywallScreen> {
-  int _selectedPlanIndex = 1; // Default to yearly
+  int _selectedPlanIndex = 0;
   List<Package> _packages = [];
   String? _error;
 
@@ -59,6 +59,8 @@ class PaywallScreenState extends State<PaywallScreen> {
             const SizedBox(height: 32),
             if (_error != null) ...[
               Text(_error!),
+            ] else if (_packages.isEmpty) ...[
+              const Center(child: CircularProgressIndicator()),
             ] else ...[
               _buildPlanSelector(localizations),
             ],
@@ -109,7 +111,7 @@ class PaywallScreenState extends State<PaywallScreen> {
             package.storeProduct.title,
             package.storeProduct.priceString,
             package.storeProduct.description,
-            index == 1, // Assume yearly is popular
+            index == 1,
           );
         }),
     );
@@ -134,10 +136,15 @@ class PaywallScreenState extends State<PaywallScreen> {
   Widget _buildSubscribeButton(
       AppLocalizations localizations, SubscriptionService subscriptionService) {
     return ElevatedButton(
-      onPressed: () async {
+      onPressed: _packages.isEmpty ? null : () async {
         try {
-          final purchaserInfo = await Purchases.purchasePackage(_packages[_selectedPlanIndex]);
-          if (purchaserInfo.entitlements.all["premium"]!.isActive) {
+          // In 9.x, purchasePackage returns CustomerInfo, 
+          // but if it's returning PurchaseResult, we'll handle both.
+          final dynamic result = await Purchases.purchasePackage(_packages[_selectedPlanIndex]);
+          
+          final CustomerInfo customerInfo = (result is CustomerInfo) ? result : result.customerInfo;
+          
+          if (customerInfo.entitlements.all["premium"]?.isActive ?? false) {
             subscriptionService.setPremium(true);
             if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
@@ -166,8 +173,8 @@ class PaywallScreenState extends State<PaywallScreen> {
     return TextButton(
       onPressed: () async {
         try {
-          final purchaserInfo = await Purchases.restorePurchases();
-          if (purchaserInfo.entitlements.all["premium"]!.isActive) {
+          final customerInfo = await Purchases.restorePurchases();
+          if (customerInfo.entitlements.all["premium"]?.isActive ?? false) {
             subscriptionService.setPremium(true);
             if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
@@ -268,7 +275,7 @@ class PriceCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    localizations.popular, // Popular
+                    localizations.popular,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),

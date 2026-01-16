@@ -12,27 +12,44 @@ import './screens/home_screen.dart';
 import './screens/login_screen.dart';
 import './screens/feature_tour_screen.dart';
 import 'firebase_options.dart';
+import 'dart:developer' as developer;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  final prefs = await SharedPreferences.getInstance();
-  final bool hasSeenTour = prefs.getBool('hasSeenTour') ?? false;
+  
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final bool hasSeenTour = prefs.getBool('hasSeenTour') ?? false;
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-            create: (context) =>
-                MedicineProvider(prefs, FirebaseAuth.instance.currentUser)),
-        ChangeNotifierProvider(create: (context) => LocaleProvider()),
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-      ],
-      child: MyApp(hasSeenTour: hasSeenTour),
-    ),
-  );
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+              create: (context) =>
+                  MedicineProvider(prefs, FirebaseAuth.instance.currentUser)),
+          ChangeNotifierProvider(create: (context) => LocaleProvider()),
+          ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ],
+        child: MyApp(hasSeenTour: hasSeenTour),
+      ),
+    );
+  } catch (e, stackTrace) {
+    developer.log('Initialization error', error: e, stackTrace: stackTrace);
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Text('Failed to initialize app. Please check your connection and try again.\n\nError: $e'),
+          ),
+        ),
+      ),
+    ));
+  }
 }
 
 class ThemeProvider with ChangeNotifier {
@@ -80,6 +97,7 @@ class MyApp extends StatelessWidget {
         Locale('zh'), // Chinese
       ],
       home: AuthWrapper(hasSeenTour: hasSeenTour),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

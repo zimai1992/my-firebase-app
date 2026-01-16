@@ -15,13 +15,13 @@ class AppLocalizationsMs extends AppLocalizations {
   String get medicine_name => 'Nama Ubat';
 
   @override
-  String get medicine_dosage => 'Dos (cth, 500mg, 1 tablet)';
+  String get medicine_dosage => 'Dos (cth., 500mg, 1 biji)';
 
   @override
   String get medicine_frequency => 'Kekerapan';
 
   @override
-  String get special_instructions => 'Arahan Khas (cth, makan dengan makanan)';
+  String get special_instructions => 'Arahan Khas (cth., ambil dengan makanan)';
 
   @override
   String get verification_prompt =>
@@ -40,19 +40,19 @@ class AppLocalizationsMs extends AppLocalizations {
   String get select_frequency => 'Pilih Kekerapan';
 
   @override
-  String get frequency_daily => 'Setiap Hari';
+  String get frequency_daily => 'Harian';
 
   @override
-  String get frequency_weekly => 'Setiap Minggu';
+  String get frequency_weekly => 'Mingguan';
 
   @override
-  String get frequency_monthly => 'Setiap Bulan';
+  String get frequency_monthly => 'Bulanan';
 
   @override
-  String get schedule_timings => 'Jadual Waktu';
+  String get schedule_timings => 'Masa Jadual';
 
   @override
-  String get evenly_spaced => 'Selang Sama';
+  String get evenly_spaced => 'Jarak Sekata';
 
   @override
   String get pick_times => 'Pilih Masa';
@@ -84,16 +84,16 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
-  String get specific_days_of_week => 'Hari-hari tertentu dalam seminggu';
+  String get specific_days_of_week => 'Hari tertentu dalam seminggu';
 
   @override
-  String get specific_dates_of_month => 'Tarikh-tarikh tertentu dalam sebulan';
+  String get specific_dates_of_month => 'Tarikh tertentu dalam sebulan';
 
   @override
-  String get times => 'Kali';
+  String get times => 'Masa';
 
   @override
-  String get count => 'Bilangan';
+  String get count => 'Kiraan';
 
   @override
   String get interval => 'Selang';
@@ -117,7 +117,7 @@ class AppLocalizationsMs extends AppLocalizations {
   String get delete => 'Padam';
 
   @override
-  String get edit_medicine => 'Sunting Ubat';
+  String get edit_medicine => 'Edit Ubat';
 
   @override
   String get how_many_times => 'Berapa kali?';
@@ -145,7 +145,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get upgrade_to_pro_subtitle =>
-      'Buka kunci semua ciri dan dapatkan pengalaman terbaik.';
+      'Nyahkunci semua ciri dan dapatkan pengalaman terbaik.';
 
   @override
   String get feature_unlimited_medicines => 'Ubat Tanpa Had';
@@ -160,7 +160,7 @@ class AppLocalizationsMs extends AppLocalizations {
   String get plan_monthly => 'Bulanan';
 
   @override
-  String get price_monthly => '\$9.99';
+  String get price_monthly => 'RM39.99';
 
   @override
   String get per_month => '/bulan';
@@ -169,7 +169,7 @@ class AppLocalizationsMs extends AppLocalizations {
   String get plan_yearly => 'Tahunan';
 
   @override
-  String get price_yearly => '\$99.99';
+  String get price_yearly => 'RM399.99';
 
   @override
   String get save_20_percent => 'Jimat 20%';
@@ -207,7 +207,10 @@ class AppLocalizationsMs extends AppLocalizations {
   String get language_english => 'Inggeris';
 
   @override
-  String get language_spanish => 'Sepanyol';
+  String get language_malay => 'Bahasa Melayu';
+
+  @override
+  String get language_chinese => 'Cina';
 
   @override
   String get settings_title => 'Tetapan';
@@ -228,17 +231,17 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get tour_page_2_description =>
-      'Simpan log sejarah ubat anda. Lihat apa yang telah anda ambil dan bila.';
+      'Simpan log sejarah perubatan anda. Lihat apa yang anda telah ambil dan bila.';
 
   @override
-  String get tour_page_3_title => 'Kekal di atas kesihatan anda';
+  String get tour_page_3_title => 'Sentiasa menjaga kesihatan anda';
 
   @override
   String get tour_page_3_description =>
-      'Dapatkan pandangan tentang pematuhan ubat anda dan kongsi laporan dengan doktor anda.';
+      'Dapatkan cerapan tentang pematuhan ubat anda dan kongsi laporan dengan doktor anda.';
 
   @override
-  String get get_started_button => 'Bermula';
+  String get get_started_button => 'Mulakan';
 
   @override
   String get lifestyle_warnings => 'Amaran Gaya Hidup';
