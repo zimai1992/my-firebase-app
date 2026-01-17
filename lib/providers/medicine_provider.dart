@@ -3,36 +3,58 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:vibration/vibration.dart';
 import '../models/medicine.dart';
 import '../models/medicine_log.dart';
 import '../services/notification_service.dart';
+import '../database/local_database.dart';
 import 'dart:developer' as developer;
 
 class MedicineProvider with ChangeNotifier {
   List<Medicine> _medicines = [];
   List<MedicineLog> _medicineLogs = [];
   List<String> _caregivers = [];
+  bool _isLoading = true;
 
   final SharedPreferences _prefs;
   final User? _user;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final NotificationService _notificationService = NotificationService();
+  final LocalDatabase _localDB = LocalDatabase.instance;
 
   MedicineProvider(this._prefs, this._user) {
-    if (_user != null) {
-      loadMedicines();
-      loadMedicineLogs();
-      loadCaregivers();
-    } else {
-      _loadMedicinesFromPrefs();
-      _loadMedicineLogsFromPrefs();
-      _loadCaregiversFromPrefs();
-    }
+    _init();
   }
 
+  bool get isLoading => _isLoading;
   List<Medicine> get medicines => _medicines;
   List<MedicineLog> get medicineLogs => _medicineLogs;
   List<String> get caregivers => _caregivers;
+
+  Future<void> _init() async {
+    _isLoading = true;
+    notifyListeners();
+    
+    await _loadFromLocalDB();
+    
+    if (_user != null) {
+      await loadMedicines();
+      await loadMedicineLogs();
+      await loadCaregivers();
+    } else {
+      await _loadMedicinesFromPrefs();
+      await _loadMedicineLogsFromPrefs();
+      await _loadCaregiversFromPrefs();
+    }
+    
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> _loadFromLocalDB() async {
+    _medicines = await _localDB.getMedicines();
+    _medicineLogs = await _localDB.getLogs();
+  }
 
   List<Medicine> getUpcomingMedicines() {
     final now = TimeOfDay.fromDateTime(DateTime.now());
@@ -40,50 +62,82 @@ class MedicineProvider with ChangeNotifier {
       return med.times.any((time) =>
           time.hour > now.hour ||
           (time.hour == now.hour && time.minute > now.minute));
-    }).toList();
+    }).toList()..sort((a, b) {
+      if (a.times.isEmpty) return 1;
+      if (b.times.isEmpty) return -1;
+      final aTime = a.times.first;
+      final bTime = b.times.first;
+      if (aTime.hour != bTime.hour) return aTime.hour.compareTo(bTime.hour);
+      return aTime.minute.compareTo(bTime.minute);
+    });
   }
 
-  List<Medicine> getMorningMedicines() {
-    return _medicines.where((med) => med.times.any((time) => time.hour < 12)).toList();
+  int getAdherenceStreak() {
+    if (_medicineLogs.isEmpty) return 0;
+    int streak = 0;
+    DateTime date = DateTime.now();
+    
+    // Normalize to date only for comparison
+    DateTime currentDate = DateTime(date.year, date.month, date.day);
+    
+    while (true) {
+      final logsOnDate = _medicineLogs.where((log) => 
+        log.timestamp.year == currentDate.year && 
+        log.timestamp.month == currentDate.month && 
+        log.timestamp.day == currentDate.day
+      );
+      
+      if (logsOnDate.isNotEmpty) {
+        streak++;
+        currentDate = currentDate.subtract(const Duration(days: 1));
+      } else {
+        break;
+      }
+    }
+    return streak;
   }
 
-  List<Medicine> getAfternoonMedicines() {
-    return _medicines.where((med) => med.times.any((time) => time.hour >= 12 && time.hour < 17)).toList();
-  }
-
-  List<Medicine> getEveningMedicines() {
-    return _medicines.where((med) => med.times.any((time) => time.hour >= 17)).toList();
-  }
-
-  bool isMedicineTakenToday(String medicineName) {
-    final today = DateTime.now();
-    return _medicineLogs.any((log) =>
-        log.medicineName == medicineName &&
-        log.timestamp.year == today.year &&
-        log.timestamp.month == today.month &&
-        log.timestamp.day == today.day);
+  Future<void> sendSOS() async {
+    if (_user == null) return;
+    try {
+      await _firestore.collection('alerts').add({
+        'type': 'SOS',
+        'patientId': _user.uid,
+        'patientName': _user.displayName ?? _user.email,
+        'timestamp': FieldValue.serverTimestamp(),
+        'status': 'active',
+      });
+      if (await Vibration.hasVibrator() ?? false) {
+        Vibration.vibrate(pattern: [0, 500, 200, 500]);
+      }
+    } catch (e) {
+      developer.log('Error sending SOS', error: e);
+    }
   }
 
   Future<void> addMedicine(Medicine medicine) async {
     _medicines.add(medicine);
+    await _localDB.saveMedicine(medicine);
     await _saveMedicines();
     notifyListeners();
   }
 
   Future<void> deleteMedicine(Medicine medicine) async {
-    _medicines.removeWhere((m) => m.name == medicine.name);
+    _medicines.removeWhere((m) => m.id == medicine.id);
+    await _localDB.deleteMedicine(medicine.id);
     if (_user != null) {
-      await _firestore.collection('users').doc(_user.uid).collection('medicines').doc(medicine.name).delete();
+      await _firestore.collection('users').doc(_user.uid).collection('medicines').doc(medicine.id).delete();
     }
     await _saveMedicines();
     notifyListeners();
   }
 
   Future<void> decreaseStock(Medicine medicine) async {
-    final index = _medicines.indexWhere((m) => m.name == medicine.name);
+    final index = _medicines.indexWhere((m) => m.id == medicine.id);
     if (index != -1) {
       if (_medicines[index].currentStock > 0) {
         _medicines[index].currentStock--;
+        await _localDB.saveMedicine(_medicines[index]);
         if (_medicines[index].currentStock <= _medicines[index].lowStockThreshold) {
           _notificationService.scheduleRefillNotification(medicine);
         }
@@ -93,20 +147,22 @@ class MedicineProvider with ChangeNotifier {
     }
   }
 
-  Future<void> refillStock(Medicine medicine, {int amount = 30}) async {
-    final index = _medicines.indexWhere((m) => m.name == medicine.name);
-    if (index != -1) {
-      _medicines[index].currentStock += amount;
-      await _saveMedicines();
-      notifyListeners();
-    }
-  }
-
   Future<void> logMedicine(Medicine medicine) async {
-    final log = MedicineLog(medicineName: medicine.name, timestamp: DateTime.now());
+    final log = MedicineLog(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      medicineId: medicine.id,
+      medicineName: medicine.name, 
+      timestamp: DateTime.now()
+    );
     _medicineLogs.insert(0, log);
+    await _localDB.saveLog(log);
     await decreaseStock(medicine);
     await _saveMedicineLogs();
+    
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(duration: 100);
+    }
+    
     notifyListeners();
   }
 
@@ -127,23 +183,13 @@ class MedicineProvider with ChangeNotifier {
     }
   }
 
-  Future<void> loadCaregivers() async {
-    if (_user == null) {
-      await _loadCaregiversFromPrefs();
-    } else {
-      final snapshot = await _firestore.collection('users').doc(_user.uid).collection('caregivers').get();
-      _caregivers = snapshot.docs.map((doc) => doc.data()['email'] as String).toList();
-    }
-    notifyListeners();
-  }
-
   Future<void> _saveMedicines() async {
     if (_user == null) {
       final medicinesJson = _medicines.map((m) => m.toJson()).toList();
       await _prefs.setString('medicines', json.encode(medicinesJson));
     } else {
       for (var medicine in _medicines) {
-        await _firestore.collection('users').doc(_user.uid).collection('medicines').doc(medicine.name).set(medicine.toJson());
+        await _firestore.collection('users').doc(_user.uid).collection('medicines').doc(medicine.id).set(medicine.toJson());
       }
     }
   }
@@ -158,21 +204,31 @@ class MedicineProvider with ChangeNotifier {
   }
 
   Future<void> loadMedicines() async {
-    if (_user == null) {
-      await _loadMedicinesFromPrefs();
-    } else {
-      final snapshot = await _firestore.collection('users').doc(_user.uid).collection('medicines').get();
-      _medicines = snapshot.docs.map((doc) => Medicine.fromJson(doc.data())).toList();
+    try {
+      if (_user != null) {
+        final snapshot = await _firestore.collection('users').doc(_user.uid).collection('medicines').get();
+        _medicines = snapshot.docs.map((doc) => Medicine.fromJson(doc.data())).toList();
+        for (var med in _medicines) {
+          await _localDB.saveMedicine(med);
+        }
+      }
+    } catch (e) {
+      developer.log('Error loading medicines from Firestore, using local data', error: e);
     }
     notifyListeners();
   }
 
   Future<void> loadMedicineLogs() async {
-    if (_user == null) {
-      await _loadMedicineLogsFromPrefs();
-    } else {
-      final snapshot = await _firestore.collection('users').doc(_user.uid).collection('medicine_logs').orderBy('timestamp', descending: true).get();
-      _medicineLogs = snapshot.docs.map((doc) => MedicineLog.fromJson(doc.data())).toList();
+    try {
+      if (_user != null) {
+        final snapshot = await _firestore.collection('users').doc(_user.uid).collection('medicine_logs').orderBy('timestamp', descending: true).get();
+        _medicineLogs = snapshot.docs.map((doc) => MedicineLog.fromJson(doc.data())).toList();
+        for (var log in _medicineLogs) {
+          await _localDB.saveLog(log);
+        }
+      }
+    } catch (e) {
+      developer.log('Error loading logs from Firestore, using local data', error: e);
     }
     notifyListeners();
   }
@@ -190,6 +246,13 @@ class MedicineProvider with ChangeNotifier {
     if (logsString != null) {
       final logsJson = json.decode(logsString) as List<dynamic>;
       _medicineLogs = logsJson.map((json) => MedicineLog.fromJson(json)).toList();
+    }
+  }
+
+  Future<void> loadCaregivers() async {
+    if (_user != null) {
+      final snapshot = await _firestore.collection('users').doc(_user.uid).collection('caregivers').get();
+      _caregivers = snapshot.docs.map((doc) => doc.data()['email'] as String).toList();
     }
   }
 

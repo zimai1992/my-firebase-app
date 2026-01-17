@@ -176,7 +176,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                     Text(
                       'Ensuring loved ones stay on track with their health.',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                        color: theme.colorScheme.onPrimaryContainer.withAlpha((0.8 * 255).toInt()),
                       ),
                     ),
                   ],
@@ -328,13 +328,13 @@ class InvitationCard extends StatelessWidget {
             IconButton(
               onPressed: onDecline,
               icon: const Icon(Icons.close, color: Colors.red),
-              style: IconButton.styleFrom(backgroundColor: Colors.red.withOpacity(0.1)),
+              style: IconButton.styleFrom(backgroundColor: Colors.red.withAlpha((0.1 * 255).toInt())),
             ),
             const SizedBox(width: 8),
             IconButton(
               onPressed: onAccept,
               icon: const Icon(Icons.check, color: Colors.green),
-              style: IconButton.styleFrom(backgroundColor: Colors.green.withOpacity(0.1)),
+              style: IconButton.styleFrom(backgroundColor: Colors.green.withAlpha((0.1 * 255).toInt())),
             ),
           ],
         ),

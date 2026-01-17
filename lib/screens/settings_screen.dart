@@ -6,6 +6,8 @@ import 'package:myapp/main.dart';
 import 'package:myapp/widgets/textured_background.dart';
 import 'package:myapp/widgets/custom_card.dart';
 import 'package:myapp/widgets/animated_fade_in.dart';
+import 'package:myapp/services/subscription_service.dart';
+import 'package:myapp/screens/paywall_screen.dart';
 import '../providers/locale_provider.dart';
 import 'caregiver/add_caregiver_screen.dart';
 import 'report_screen.dart';
@@ -17,6 +19,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final subscription = Provider.of<SubscriptionService>(context);
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final user = FirebaseAuth.instance.currentUser;
@@ -35,7 +38,7 @@ class SettingsScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildProfileHeader(user, theme),
+                  _buildProfileHeader(user, theme, subscription.isPremium),
                   const SizedBox(height: 24),
                   
                   _buildSectionHeader('Appearance & Language'),
@@ -70,7 +73,14 @@ class SettingsScreen extends StatelessWidget {
                           iconColor: Colors.red,
                           title: 'Doctor Report',
                           subtitle: 'Generate a medication history PDF',
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => const ReportScreen())),
+                          trailing: !subscription.isPremium ? const Icon(Icons.lock_outline, size: 16, color: Colors.grey) : null,
+                          onTap: () {
+                            if (!subscription.isPremium) {
+                              _showPremiumRequired(context, 'Doctor Reports');
+                            } else {
+                              Navigator.push(context, MaterialPageRoute(builder: (c) => const ReportScreen()));
+                            }
+                          },
                         ),
                         const Divider(height: 1),
                         _buildSettingTile(
@@ -78,7 +88,14 @@ class SettingsScreen extends StatelessWidget {
                           iconColor: Colors.blue,
                           title: 'Share My Data',
                           subtitle: 'Link with a caregiver',
-                          onTap: () => _showShareCodeDialog(context),
+                          trailing: !subscription.isPremium ? const Icon(Icons.lock_outline, size: 16, color: Colors.grey) : null,
+                          onTap: () {
+                            if (!subscription.isPremium) {
+                              _showPremiumRequired(context, 'Caregiver Real-time Sync');
+                            } else {
+                              _showShareCodeDialog(context);
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -106,6 +123,20 @@ class SettingsScreen extends StatelessWidget {
                       onTap: () => FirebaseAuth.instance.signOut(),
                     ),
                   ),
+                  const SizedBox(height: 24),
+
+                  // DEBUG TOOLS
+                  _buildSectionHeader('Developer Tools'),
+                  CustomCard(
+                    color: Colors.grey[100],
+                    child: _buildSettingTile(
+                      icon: Icons.bug_report,
+                      iconColor: Colors.orange,
+                      title: 'Toggle Premium (Debug)',
+                      subtitle: 'Status: ${subscription.isPremium ? 'PREMIUM' : 'FREE'}',
+                      onTap: () => subscription.togglePremiumDebug(),
+                    ),
+                  ),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -116,34 +147,80 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(User? user, ThemeData theme) {
+  void _showPremiumRequired(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Premium Feature'),
+        content: Text('$feature is only available to premium subscribers. Upgrade to get full access to AI health insights, voice commands, and reports.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Maybe Later')),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (c) => const PaywallScreen()));
+            },
+            child: const Text('View Plans'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(User? user, ThemeData theme, bool isPremium) {
     return AnimatedFadeIn(
       child: CustomCard(
-        color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+        color: isPremium ? Colors.amber.shade100.withAlpha(50) : theme.colorScheme.primaryContainer.withAlpha((0.3 * 255).toInt()),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 35,
-                backgroundColor: theme.colorScheme.primary,
-                child: Text(
-                  (user?.displayName ?? user?.email ?? 'U')[0].toUpperCase(),
-                  style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
-                ),
+              Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: theme.colorScheme.primary,
+                    child: Text(
+                      (user?.displayName ?? user?.email ?? 'U')[0].toUpperCase(),
+                      style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  if (isPremium)
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle),
+                        child: const Icon(Icons.star, size: 12, color: Colors.white),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      user?.displayName ?? 'My Profile',
-                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    Row(
+                      children: [
+                        Text(
+                          user?.displayName ?? 'My Profile',
+                          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        if (isPremium) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(4)),
+                            child: const Text('PRO', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white)),
+                          ),
+                        ]
+                      ],
                     ),
                     Text(
                       user?.email ?? 'No email linked',
-                      style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 13),
+                      style: TextStyle(color: theme.colorScheme.onSurface.withAlpha((0.6 * 255).toInt()), fontSize: 13),
                     ),
                   ],
                 ),
@@ -177,7 +254,7 @@ class SettingsScreen extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: (iconColor ?? Colors.teal).withOpacity(0.1),
+          color: (iconColor ?? Colors.teal).withAlpha((0.1 * 255).toInt()),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: iconColor ?? Colors.teal, size: 20),
@@ -234,9 +311,9 @@ class SettingsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withAlpha((0.1 * 255).toInt()),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                border: Border.all(color: Colors.blue.withAlpha((0.3 * 255).toInt())),
               ),
               child: const Text(
                 '123 456',

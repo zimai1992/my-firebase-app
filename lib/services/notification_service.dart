@@ -26,29 +26,61 @@ class NotificationService {
       android: initializationSettingsAndroid,
     );
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse details) {
+        // Handle action here if needed in main.dart or via a stream
+      },
+    );
     tz.initializeTimeZones();
   }
 
-  Future<void> scheduleNotification(
-      int id, String title, String body, DateTime scheduledTime) async {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(scheduledTime, tz.local),
-        const NotificationDetails(
+  Future<void> scheduleMedicineReminder(Medicine medicine) async {
+    // Schedule for each time in the medicine.times list
+    for (int i = 0; i < medicine.times.length; i++) {
+      final time = medicine.times[i];
+      final now = DateTime.now();
+      var scheduledDate = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+      
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        medicine.hashCode + i,
+        'Time for ${medicine.name}',
+        'Dosage: ${medicine.dosage}. Tap to log as taken.',
+        tz.TZDateTime.from(scheduledDate, tz.local),
+        NotificationDetails(
           android: AndroidNotificationDetails(
-            'your_channel_id',
-            'your_channel_name',
-            channelDescription: 'your_channel_description',
+            'medicine_reminders',
+            'Medicine Reminders',
+            channelDescription: 'Daily reminders for medications',
             importance: Importance.max,
             priority: Priority.high,
+            // Action buttons appear on Smart Watches (Wear OS / watchOS)
+            actions: <AndroidNotificationAction>[
+              const AndroidNotificationAction(
+                'mark_taken',
+                'Mark as Taken',
+                showsUserInterface: true,
+                cancelNotification: true,
+              ),
+              const AndroidNotificationAction(
+                'snooze',
+                'Snooze (10m)',
+                showsUserInterface: false,
+              ),
+            ],
+          ),
+          iOS: const DarwinNotificationDetails(
+            categoryIdentifier: 'medicine_category',
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        // uiLocalNotificationDateInterpretation is removed in newer versions
-    );
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    }
   }
 
   Future<void> scheduleRefillNotification(Medicine medicine) async {
@@ -63,6 +95,13 @@ class NotificationService {
           channelDescription: 'Notifications for low stock warnings.',
           importance: Importance.max,
           priority: Priority.high,
+          actions: <AndroidNotificationAction>[
+            AndroidNotificationAction(
+              'find_pharmacy',
+              'Find Pharmacy',
+              showsUserInterface: true,
+            ),
+          ],
         ),
       ),
     );

@@ -99,7 +99,7 @@ class _VisitModeScreenState extends State<VisitModeScreen> {
 
   Widget _buildPatientHeader(ThemeData theme) {
     return CustomCard(
-      color: theme.colorScheme.primaryContainer.withOpacity(0.2),
+      color: theme.colorScheme.primaryContainer.withAlpha((0.2 * 255).toInt()),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(

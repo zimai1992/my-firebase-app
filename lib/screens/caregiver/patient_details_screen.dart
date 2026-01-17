@@ -62,10 +62,14 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
 
   Future<void> _logMedicineForPatient(Medicine medicine) async {
     try {
-      final log = MedicineLog(medicineName: medicine.name, timestamp: DateTime.now());
+      final log = MedicineLog(
+        medicineId: medicine.id,
+        medicineName: medicine.name, 
+        timestamp: DateTime.now()
+      );
       await _firestore.collection('users').doc(widget.patient.id).collection('medicine_logs').add(log.toJson());
 
-      final medicineRef = _firestore.collection('users').doc(widget.patient.id).collection('medicines').doc(medicine.name);
+      final medicineRef = _firestore.collection('users').doc(widget.patient.id).collection('medicines').doc(medicine.id);
 
       await _firestore.runTransaction((transaction) async {
         final freshSnapshot = await transaction.get(medicineRef);
@@ -194,7 +198,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
               final logs = logSnapshot.data ?? [];
               final compliance = calculateOverallCompliance(medicines, logs);
               return CustomCard(
-                color: theme.colorScheme.secondaryContainer.withOpacity(0.5),
+                color: theme.colorScheme.secondaryContainer.withAlpha((0.5 * 255).toInt()),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
@@ -212,7 +216,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: _getComplianceColor(compliance).withOpacity(0.2),
+                              color: _getComplianceColor(compliance).withAlpha((0.2 * 255).toInt()),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text('${compliance.toInt()}%', style: TextStyle(color: _getComplianceColor(compliance), fontWeight: FontWeight.bold)),
@@ -338,7 +342,7 @@ class MedicineCard extends StatelessWidget {
                 if (isTaken)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                    decoration: BoxDecoration(color: Colors.green.withAlpha((0.1 * 255).toInt()), borderRadius: BorderRadius.circular(4)),
                     child: const Row(children: [Icon(Icons.check, size: 14, color: Colors.green), SizedBox(width: 4), Text('Done', style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold))]),
                   ),
               ],
@@ -373,6 +377,6 @@ class LogTile extends StatelessWidget {
     final theme = Theme.of(context);
     final formattedDate = MaterialLocalizations.of(context).formatMediumDate(log.timestamp);
     final formattedTime = TimeOfDay.fromDateTime(log.timestamp).format(context);
-    return CustomCard(margin: const EdgeInsets.only(bottom: 8), color: Colors.white.withOpacity(0.5), child: ListTile(dense: true, leading: Icon(Icons.check_circle_outline, color: theme.colorScheme.primary, size: 20), title: Text(log.medicineName, style: const TextStyle(fontWeight: FontWeight.w500)), subtitle: Text('$formattedDate • $formattedTime', style: const TextStyle(fontSize: 11))));
+    return CustomCard(margin: const EdgeInsets.only(bottom: 8), color: Colors.white.withAlpha((0.5 * 255).toInt()), child: ListTile(dense: true, leading: Icon(Icons.check_circle_outline, color: theme.colorScheme.primary, size: 20), title: Text(log.medicineName, style: const TextStyle(fontWeight: FontWeight.w500)), subtitle: Text('$formattedDate • $formattedTime', style: const TextStyle(fontSize: 11))));
   }
 }

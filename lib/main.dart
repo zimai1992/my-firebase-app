@@ -10,7 +10,9 @@ import './providers/medicine_provider.dart';
 import './providers/locale_provider.dart';
 import './screens/home_screen.dart';
 import './screens/login_screen.dart';
-import './screens/feature_tour_screen.dart';
+import './screens/onboarding/welcome_screen.dart';
+import './services/notification_service.dart';
+import './services/subscription_service.dart';
 import 'firebase_options.dart';
 import 'dart:developer' as developer;
 
@@ -25,6 +27,14 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
+    // Initialize Notification Service
+    final notificationService = NotificationService();
+    await notificationService.init();
+
+    // Initialize Subscription Service
+    final subscriptionService = SubscriptionService();
+    await subscriptionService.init();
+
     runApp(
       MultiProvider(
         providers: [
@@ -33,6 +43,7 @@ void main() async {
                   MedicineProvider(prefs, FirebaseAuth.instance.currentUser)),
           ChangeNotifierProvider(create: (context) => LocaleProvider()),
           ChangeNotifierProvider(create: (context) => ThemeProvider()),
+          ChangeNotifierProvider.value(value: subscriptionService),
         ],
         child: MyApp(hasSeenTour: hasSeenTour),
       ),
@@ -117,7 +128,7 @@ class AuthWrapper extends StatelessWidget {
           );
         }
         if (!hasSeenTour) {
-          return const FeatureTourScreen();
+          return const WelcomeScreen();
         }
         if (snapshot.hasData) {
           return const HomeScreen();

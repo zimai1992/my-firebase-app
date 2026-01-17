@@ -48,7 +48,7 @@ class AdherenceChart extends StatelessWidget {
               dotData: const FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
-                color: theme.colorScheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withAlpha((0.1 * 255).toInt()),
               ),
             ),
           ],

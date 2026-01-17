@@ -5,6 +5,8 @@ import 'package:myapp/l10n/app_localizations.dart';
 import 'package:myapp/widgets/textured_background.dart';
 import 'package:myapp/widgets/custom_card.dart';
 import 'package:myapp/widgets/animated_fade_in.dart';
+import 'package:myapp/services/subscription_service.dart';
+import 'package:myapp/screens/paywall_screen.dart';
 import '../models/medicine.dart';
 import '../providers/medicine_provider.dart';
 import '../widgets/frequency_picker.dart';
@@ -40,6 +42,8 @@ class AddMedicineScreenState extends State<AddMedicineScreen> {
   bool _isVerified = false;
   ScheduleType _scheduleType = ScheduleType.evenlySpaced;
   List<TimeOfDay> _selectedTimes = [];
+  PillShape _selectedShape = PillShape.round;
+  Color _selectedColor = Colors.teal;
 
   @override
   void initState() {
@@ -112,6 +116,7 @@ class AddMedicineScreenState extends State<AddMedicineScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final isPremium = Provider.of<SubscriptionService>(context).isPremium;
     
     String frequencyText = _frequency != null 
         ? '${_frequency!['count']} x ${_frequency!['interval']}' 
@@ -142,7 +147,7 @@ class AddMedicineScreenState extends State<AddMedicineScreen> {
           child: ListView(
             padding: const EdgeInsets.all(20.0),
             children: [
-              _buildAIScanBanner(context),
+              _buildAIScanBanner(context, isPremium),
               const SizedBox(height: 24),
               
               _buildSectionHeader(context, 'Basic Information', Icons.info_outline),
@@ -167,6 +172,51 @@ class AddMedicineScreenState extends State<AddMedicineScreen> {
                         hintText: 'e.g. 500mg or 1 Tablet',
                       ),
                       validator: (v) => v?.isEmpty ?? true ? localizations.please_enter_dosage : null,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              _buildSectionHeader(context, 'Pill Appearance', Icons.palette_outlined),
+              CustomCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: PillShape.values.map((shape) => InkWell(
+                        onTap: () => setState(() => _selectedShape = shape),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _selectedShape == shape ? theme.colorScheme.primary.withAlpha(25) : null,
+                            borderRadius: BorderRadius.circular(12),
+                            border: _selectedShape == shape ? Border.all(color: theme.colorScheme.primary) : null,
+                          ),
+                          child: Icon(_getPillIcon(shape), color: _selectedShape == shape ? theme.colorScheme.primary : Colors.grey),
+                        ),
+                      )).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [Colors.teal, Colors.blue, Colors.orange, Colors.red, Colors.purple, Colors.pink, Colors.green]
+                          .map((color) => InkWell(
+                            onTap: () => setState(() => _selectedColor = color),
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: _selectedColor == color ? Border.all(color: Colors.black, width: 2) : null,
+                              ),
+                            ),
+                          )).toList(),
+                      ),
                     ),
                   ],
                 ),
@@ -267,24 +317,39 @@ class AddMedicineScreenState extends State<AddMedicineScreen> {
     );
   }
 
-  Widget _buildAIScanBanner(BuildContext context) {
+  IconData _getPillIcon(PillShape shape) {
+    switch (shape) {
+      case PillShape.capsule: return Icons.medication_liquid;
+      case PillShape.liquid: return Icons.water_drop;
+      case PillShape.square: return Icons.crop_square;
+      default: return Icons.circle;
+    }
+  }
+
+  Widget _buildAIScanBanner(BuildContext context, bool isPremium) {
     final theme = Theme.of(context);
     return AnimatedFadeIn(
       child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => const CameraScannerScreen())),
+        onTap: () {
+          if (!isPremium) {
+            _showPremiumRequired('AI Smart Scan');
+          } else {
+            Navigator.push(context, MaterialPageRoute(builder: (c) => const CameraScannerScreen()));
+          }
+        },
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: LinearGradient(colors: [theme.colorScheme.primary, theme.colorScheme.secondary]),
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(color: theme.colorScheme.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))],
+            boxShadow: [BoxShadow(color: theme.colorScheme.primary.withAlpha(76), blurRadius: 10, offset: const Offset(0, 4))],
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.auto_awesome, color: Colors.white, size: 32),
-              SizedBox(width: 16),
-              Expanded(
+              const Icon(Icons.auto_awesome, color: Colors.white, size: 32),
+              const SizedBox(width: 16),
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -293,10 +358,33 @@ class AddMedicineScreenState extends State<AddMedicineScreen> {
                   ],
                 ),
               ),
-              Icon(Icons.camera_alt, color: Colors.white),
+              if (!isPremium) 
+                const Icon(Icons.lock_outline, color: Colors.white)
+              else
+                const Icon(Icons.camera_alt, color: Colors.white),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showPremiumRequired(String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Premium Feature'),
+        content: Text('$feature is only available to premium subscribers. Upgrade to get full access to AI health insights, voice commands, and reports.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Maybe Later')),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (c) => const PaywallScreen()));
+            },
+            child: const Text('View Plans'),
+          ),
+        ],
       ),
     );
   }
@@ -344,8 +432,8 @@ class AddMedicineScreenState extends State<AddMedicineScreen> {
 
   Widget _buildVerificationCard(AppLocalizations localizations, ThemeData theme) {
     return CustomCard(
-      color: _isVerified ? Colors.green.withOpacity(0.05) : Colors.red.withOpacity(0.05),
-      border: Border.all(color: _isVerified ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3)),
+      color: _isVerified ? Colors.green.withAlpha(13) : Colors.red.withAlpha(13),
+      border: Border.all(color: _isVerified ? Colors.green.withAlpha(76) : Colors.red.withAlpha(76)),
       child: CheckboxListTile(
         title: Text(localizations.verification_prompt, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
         value: _isVerified,
@@ -370,6 +458,8 @@ class AddMedicineScreenState extends State<AddMedicineScreen> {
         specialInstructions: _specialInstructions,
         currentStock: int.tryParse(_stockController.text) ?? 0,
         lowStockThreshold: int.tryParse(_thresholdController.text) ?? 10,
+        pillShape: _selectedShape,
+        pillColor: _selectedColor,
       );
       Provider.of<MedicineProvider>(context, listen: false).addMedicine(medicine);
       Navigator.pop(context);

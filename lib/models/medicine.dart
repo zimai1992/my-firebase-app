@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+enum PillShape { round, capsule, liquid, square }
+
 class Medicine {
+  final String id;
   final String name;
   final String dosage;
   final String frequency;
@@ -10,8 +13,11 @@ class Medicine {
   int lowStockThreshold;
   final String? recommendationNote;
   final String? lifestyleWarnings;
+  final PillShape pillShape;
+  final Color pillColor;
 
   Medicine({
+    String? id,
     required this.name,
     required this.dosage,
     required this.frequency,
@@ -21,10 +27,13 @@ class Medicine {
     this.lowStockThreshold = 10,
     this.recommendationNote,
     this.lifestyleWarnings,
-  });
+    this.pillShape = PillShape.round,
+    this.pillColor = Colors.teal,
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString();
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'dosage': dosage,
       'frequency': frequency,
@@ -34,11 +43,16 @@ class Medicine {
       'lowStockThreshold': lowStockThreshold,
       'recommendationNote': recommendationNote,
       'lifestyleWarnings': lifestyleWarnings,
+      'pillShape': pillShape.index,
+      'pillColor': pillColor.toARGB32(),
     };
   }
 
+  Map<String, dynamic> toMap() => toJson(); // Alias for database
+
   factory Medicine.fromJson(Map<String, dynamic> json) {
     return Medicine(
+      id: json['id'],
       name: json['name'] ?? '',
       dosage: json['dosage'] ?? '',
       frequency: json['frequency'] ?? '',
@@ -52,6 +66,10 @@ class Medicine {
       lowStockThreshold: json['lowStockThreshold'] ?? 10,
       recommendationNote: json['recommendationNote'],
       lifestyleWarnings: json['lifestyleWarnings'],
+      pillShape: PillShape.values[json['pillShape'] ?? 0],
+      pillColor: Color(json['pillColor'] ?? Colors.teal.toARGB32()),
     );
   }
+
+  factory Medicine.fromMap(Map<String, dynamic> map) => Medicine.fromJson(map);
 }

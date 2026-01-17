@@ -25,29 +25,30 @@ The project follows a feature-driven, layered architecture to ensure a clean sep
 - **Visit Mode**: A structured checklist for caregivers to use during physical check-ins.
 - **Professional Reports**: Generates detailed PDF health reports for doctors.
 - **Localization**: Supports English, Malay, and Chinese.
+- **Emergency SOS**: Real-time Firestore alerts with haptic feedback for patient safety.
+- **Voice Commands**: Voice-enabled logging and adherence checks ("Did I take my medicine?").
+- **Gamification**: Adherence streaks and milestone badges (On Fire, Weekly Warrior, Monthly Master).
+- **One-Tap Refill**: Google Maps integration for finding nearby pharmacies and refill planning.
+- **Offline Persistence**: Full SQLite local database (Sqflite) for offline reliability.
+- **Smart Watch Support**: Actionable notifications (Mark as Taken, Snooze) for Wear OS and watchOS.
 
 ## 4. Technical Details
 - **State Management**: `provider` package.
 - **Backend**: Firebase (Auth, Firestore).
+- **Local Storage**: `sqflite` (Primary), `shared_preferences` (Settings).
 - **AI**: Google Generative AI (Gemini 1.5 Flash).
-- **Charts**: `fl_chart`.
-- **PDF**: `pdf` and `printing` packages.
-- **Storage**: `shared_preferences` and Firestore.
+- **Notifications**: `flutter_local_notifications` with custom actions.
+- **Speech**: `speech_to_text` for elderly-friendly interaction.
+- **Haptics**: `vibration` package for tactile confirmation.
 
 ## 5. Design & Theme (Material 3)
-- **Primary Color**: Deep Medical Teal (`0xFF009688`).
-- **Typography**: Poppins (with system sans-serif fallback for offline/restricted environments).
-- **Visual Effects**: Custom cards with soft shadows and textured backgrounds.
+- **Dynamic Theming**: Gradients that change based on the time of day (Morning/Afternoon/Evening).
+- **Pill Customization**: Customizable shapes (Round, Capsule, Liquid, Square) and colors.
+- **Focus UI**: Large, prominent "Next Dose" cards on the home screen.
+- **Skeleton Loading**: Shimmer effects for a premium loading experience.
+- **Interactive Onboarding**: Fluid welcome flow with `smooth_page_indicator`.
 
-## 6. Troubleshooting & Environment Notes (IDX/Emulator)
-- **Firebase Auth/Firestore (Android)**: If you see `DEVELOPER_ERROR` or `PERMISSION_DENIED` in the Android emulator:
-    1. Ensure the SHA-1 fingerprint of your debug keystore is added to the Firebase Console.
-    2. To get the SHA-1, run `./gradlew signingReport` in the `android` folder.
-    3. Firestore rules have been optimized for `collectionGroup` queries and caregiver access.
-- **Font Loading**: `google_fonts` may fail in restricted networks (like the IDX emulator). The app handles this gracefully by falling back to system fonts.
-- **Web Preview**: For the most stable development experience in IDX, use the **Web Preview**, which bypasses Android-specific certificate requirements.
-
-## 7. Future Roadmap
+## 6. Future Roadmap
 - Integration with smart pillboxes via Bluetooth.
-- Direct pharmacy refill requests.
-- Multi-user profiles for families.
+- Direct pharmacy API integration for automatic refill orders.
+- Multi-user family profiles.
