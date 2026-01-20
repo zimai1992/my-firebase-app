@@ -543,6 +543,804 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lifestyle Warnings'**
   String get lifestyle_warnings;
+
+  /// No description provided for @level_label.
+  ///
+  /// In en, this message translates to:
+  /// **'LEVEL'**
+  String get level_label;
+
+  /// No description provided for @to_level_x.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% to Level {level}'**
+  String to_level_x(Object level, Object percent);
+
+  /// No description provided for @tier_seedling.
+  ///
+  /// In en, this message translates to:
+  /// **'Seedling'**
+  String get tier_seedling;
+
+  /// No description provided for @tier_guardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Adherence Guardian'**
+  String get tier_guardian;
+
+  /// No description provided for @tier_hero.
+  ///
+  /// In en, this message translates to:
+  /// **'Adherence Hero'**
+  String get tier_hero;
+
+  /// No description provided for @tier_sentinel.
+  ///
+  /// In en, this message translates to:
+  /// **'Diamond Sentinel'**
+  String get tier_sentinel;
+
+  /// No description provided for @tier_immortal.
+  ///
+  /// In en, this message translates to:
+  /// **'Adherence Immortal'**
+  String get tier_immortal;
+
+  /// No description provided for @oracle_title.
+  ///
+  /// In en, this message translates to:
+  /// **'THE CLINICAL ORACLE'**
+  String get oracle_title;
+
+  /// No description provided for @oracle_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock advanced longitudinal pattern detection. (Requires Premium & Level 50+)'**
+  String get oracle_description;
+
+  /// No description provided for @oracle_button.
+  ///
+  /// In en, this message translates to:
+  /// **'CONSULT THE ORACLE'**
+  String get oracle_button;
+
+  /// No description provided for @premium_required.
+  ///
+  /// In en, this message translates to:
+  /// **'The Clinical Oracle requires a Premium subscription.'**
+  String get premium_required;
+
+  /// No description provided for @immortal_required.
+  ///
+  /// In en, this message translates to:
+  /// **'The Clinical Oracle is only accessible to \'Adherence Immortals\' (Level 50+). Keep taking your medicine to unlock!'**
+  String get immortal_required;
+
+  /// No description provided for @oracle_insights.
+  ///
+  /// In en, this message translates to:
+  /// **'Oracle Insights'**
+  String get oracle_insights;
+
+  /// No description provided for @oracle_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'The Oracle is silent. Insufficient data for deep analysis.'**
+  String get oracle_empty;
+
+  /// No description provided for @oracle_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Oracle Sync Failure: High-fidelity pattern analysis requires more consistent data logging.'**
+  String get oracle_error;
+
+  /// No description provided for @missed_label.
+  ///
+  /// In en, this message translates to:
+  /// **'MISSED'**
+  String get missed_label;
+
+  /// No description provided for @filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filter_all;
+
+  /// No description provided for @filter_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed Only'**
+  String get filter_missed;
+
+  /// No description provided for @reading_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Saved'**
+  String get reading_saved;
+
+  /// No description provided for @health_alert.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Alert'**
+  String get health_alert;
+
+  /// No description provided for @health_vitals.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Vitals'**
+  String get health_vitals;
+
+  /// No description provided for @add_new_reading.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Reading'**
+  String get add_new_reading;
+
+  /// No description provided for @save_record.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE RECORD'**
+  String get save_record;
+
+  /// No description provided for @recent_history.
+  ///
+  /// In en, this message translates to:
+  /// **'RECENT HISTORY'**
+  String get recent_history;
+
+  /// No description provided for @entries_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Entries'**
+  String entries_count(Object count);
+
+  /// No description provided for @no_readings_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No readings recorded yet'**
+  String get no_readings_yet;
+
+  /// No description provided for @missed_dose_guide.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed Dose Guide'**
+  String get missed_dose_guide;
+
+  /// No description provided for @what_to_do_late.
+  ///
+  /// In en, this message translates to:
+  /// **'WHAT TO DO IF > 2 HOURS LATE'**
+  String get what_to_do_late;
+
+  /// No description provided for @safe_window.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe Window'**
+  String get safe_window;
+
+  /// No description provided for @clinical_references.
+  ///
+  /// In en, this message translates to:
+  /// **'CLINICAL REFERENCES'**
+  String get clinical_references;
+
+  /// No description provided for @upgrade_to_premium.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgrade_to_premium;
+
+  /// No description provided for @maybe_later.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get maybe_later;
+
+  /// No description provided for @view_plans.
+  ///
+  /// In en, this message translates to:
+  /// **'View Plans'**
+  String get view_plans;
+
+  /// No description provided for @ai_pharmacist.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Pharmacist'**
+  String get ai_pharmacist;
+
+  /// No description provided for @typing_indicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Typing...'**
+  String get typing_indicator;
+
+  /// No description provided for @premium_feature.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Feature'**
+  String get premium_feature;
+
+  /// No description provided for @pro_label.
+  ///
+  /// In en, this message translates to:
+  /// **'PRO'**
+  String get pro_label;
+
+  /// No description provided for @share_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Data'**
+  String get share_data;
+
+  /// No description provided for @caregiver_code_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Your unique caregiver code:'**
+  String get caregiver_code_label;
+
+  /// No description provided for @copy_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Code'**
+  String get copy_code;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @guest_login.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as Guest'**
+  String get guest_login;
+
+  /// No description provided for @error_parsing_med.
+  ///
+  /// In en, this message translates to:
+  /// **'Error parsing medication information.'**
+  String get error_parsing_med;
+
+  /// No description provided for @health_adherence_report.
+  ///
+  /// In en, this message translates to:
+  /// **'HEALTH ADHERENCE REPORT'**
+  String get health_adherence_report;
+
+  /// No description provided for @generated_by_ai.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated by AI Medication Manager'**
+  String get generated_by_ai;
+
+  /// No description provided for @page_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} of {total}'**
+  String page_info(Object current, Object total);
+
+  /// No description provided for @patient_info.
+  ///
+  /// In en, this message translates to:
+  /// **'PATIENT INFORMATION'**
+  String get patient_info;
+
+  /// No description provided for @report_period.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Period: Last 30 Days'**
+  String get report_period;
+
+  /// No description provided for @overall_adherence.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Adherence'**
+  String get overall_adherence;
+
+  /// No description provided for @medication_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'MEDICATION SUMMARY'**
+  String get medication_summary;
+
+  /// No description provided for @health_vital_readings.
+  ///
+  /// In en, this message translates to:
+  /// **'HEALTH VITAL READINGS'**
+  String get health_vital_readings;
+
+  /// No description provided for @recent_dosage_logs.
+  ///
+  /// In en, this message translates to:
+  /// **'RECENT DOSAGE LOGS'**
+  String get recent_dosage_logs;
+
+  /// No description provided for @ai_clinical_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'AI CLINICAL SUMMARY (BY GEMINI)'**
+  String get ai_clinical_summary;
+
+  /// No description provided for @clinician_review_recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinician Review Recommended'**
+  String get clinician_review_recommended;
+
+  /// No description provided for @clinical_report.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinical Report'**
+  String get clinical_report;
+
+  /// No description provided for @generate_pdf.
+  ///
+  /// In en, this message translates to:
+  /// **'GENERATE PDF REPORT'**
+  String get generate_pdf;
+
+  /// No description provided for @analyzing_patterns.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini is analyzing health patterns...'**
+  String get analyzing_patterns;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'DONE'**
+  String get done;
+
+  /// No description provided for @oracle_sync_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Oracle sync failed: {error}'**
+  String oracle_sync_error(Object error);
+
+  /// No description provided for @systolic.
+  ///
+  /// In en, this message translates to:
+  /// **'Systolic'**
+  String get systolic;
+
+  /// No description provided for @diastolic.
+  ///
+  /// In en, this message translates to:
+  /// **'Diastolic'**
+  String get diastolic;
+
+  /// No description provided for @glucose_sugar.
+  ///
+  /// In en, this message translates to:
+  /// **'Glucose (Sugar)'**
+  String get glucose_sugar;
+
+  /// No description provided for @blood_pressure.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Pressure'**
+  String get blood_pressure;
+
+  /// No description provided for @inr_warfarin.
+  ///
+  /// In en, this message translates to:
+  /// **'INR (Warfarin)'**
+  String get inr_warfarin;
+
+  /// No description provided for @unit_mmol_l.
+  ///
+  /// In en, this message translates to:
+  /// **'mmol/L'**
+  String get unit_mmol_l;
+
+  /// No description provided for @unit_mm_hg.
+  ///
+  /// In en, this message translates to:
+  /// **'mmHg'**
+  String get unit_mm_hg;
+
+  /// No description provided for @unit_ratio.
+  ///
+  /// In en, this message translates to:
+  /// **'Ratio'**
+  String get unit_ratio;
+
+  /// No description provided for @abnormal_glucose.
+  ///
+  /// In en, this message translates to:
+  /// **'Abnormal Glucose Level. Please consult a doctor immediately.'**
+  String get abnormal_glucose;
+
+  /// No description provided for @inr_out_of_range.
+  ///
+  /// In en, this message translates to:
+  /// **'INR out of range (Target 2.0-3.0 usually). Check with your doctor!'**
+  String get inr_out_of_range;
+
+  /// No description provided for @share_report.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Report'**
+  String get share_report;
+
+  /// No description provided for @my_health_report.
+  ///
+  /// In en, this message translates to:
+  /// **'My Health Report'**
+  String get my_health_report;
+
+  /// No description provided for @filter_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter:'**
+  String get filter_label;
+
+  /// No description provided for @no_missed_doses.
+  ///
+  /// In en, this message translates to:
+  /// **'No missed doses recorded.'**
+  String get no_missed_doses;
+
+  /// No description provided for @no_history.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet.'**
+  String get no_history;
+
+  /// No description provided for @free_tier_history_note.
+  ///
+  /// In en, this message translates to:
+  /// **'Free tier shows last 7 days. Upgrade to see full history.'**
+  String get free_tier_history_note;
+
+  /// No description provided for @appearance_language.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance & Language'**
+  String get appearance_language;
+
+  /// No description provided for @dark_mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get dark_mode;
+
+  /// No description provided for @health_support.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Support'**
+  String get health_support;
+
+  /// No description provided for @doctor_report_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor Report'**
+  String get doctor_report_title;
+
+  /// No description provided for @doctor_report_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a medication history PDF'**
+  String get doctor_report_subtitle;
+
+  /// No description provided for @share_data_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Share My Data'**
+  String get share_data_title;
+
+  /// No description provided for @share_data_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link with a caregiver'**
+  String get share_data_subtitle;
+
+  /// No description provided for @monitoring_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitoring'**
+  String get monitoring_section;
+
+  /// No description provided for @caregiver_access_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Caregiver Access'**
+  String get caregiver_access_title;
+
+  /// No description provided for @caregiver_access_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor someone else\'s health'**
+  String get caregiver_access_subtitle;
+
+  /// No description provided for @account_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account_section;
+
+  /// No description provided for @sign_out.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get sign_out;
+
+  /// No description provided for @premium_required_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'{feature} is only available to premium subscribers. Upgrade to get full access to AI health insights, voice commands, and reports.'**
+  String premium_required_desc(Object feature);
+
+  /// No description provided for @guest_email.
+  ///
+  /// In en, this message translates to:
+  /// **'No email linked'**
+  String get guest_email;
+
+  /// No description provided for @my_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get my_profile;
+
+  /// No description provided for @caregiver_code_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code with your caregiver to allow them to monitor your health in real-time.'**
+  String get caregiver_code_desc;
+
+  /// No description provided for @missed_dose_guide_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed Dose Guide'**
+  String get missed_dose_guide_title;
+
+  /// No description provided for @od_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Once Daily (OD)'**
+  String get od_title;
+
+  /// No description provided for @od_protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the missed dose as soon as it is remembered, up to 8 hours late.\n\nAfter 8 hours, skip the dose and wait for your next scheduled time.'**
+  String get od_protocol;
+
+  /// No description provided for @multiple_times_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Times a Day'**
+  String get multiple_times_title;
+
+  /// No description provided for @multiple_times_protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'If more than 2 hours late, skip the missed dose and wait until the next dose is due.\n\nDo not double your dose to catch up.'**
+  String get multiple_times_protocol;
+
+  /// No description provided for @side_effects_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Side Effects'**
+  String get side_effects_title;
+
+  /// No description provided for @side_effects_protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor for side effects, as these may be increased if the dosing interval is shorter.'**
+  String get side_effects_protocol;
+
+  /// No description provided for @meals_food_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals & Food'**
+  String get meals_food_title;
+
+  /// No description provided for @meals_food_protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'You can usually ignore warnings about taking the medicine with or without meals, unless there’s a significant risk of serious side-effects.'**
+  String get meals_food_protocol;
+
+  /// No description provided for @forgiveness_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication \"Forgiveness\"'**
+  String get forgiveness_title;
+
+  /// No description provided for @forgiveness_protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Scientifically, \"forgiveness\" describes how much your medicine protects you after a missed dose.\n\n• Forgiving: Aspirin, Amlodipine (long-acting effects).\n• Unforgiving: Blood thinners (Rivaroxaban), Epilepsy meds, and Contraceptives. These require strict timing.'**
+  String get forgiveness_protocol;
+
+  /// No description provided for @safe_window_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe Window'**
+  String get safe_window_title;
+
+  /// No description provided for @safe_window_protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Once Daily (OD): You can take your dose up to 8 hours late. Others: 2 hours strictly.'**
+  String get safe_window_protocol;
+
+  /// No description provided for @caregiver_hub_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Caregiver Hub'**
+  String get caregiver_hub_title;
+
+  /// No description provided for @caregiver_login_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login to continue.'**
+  String get caregiver_login_prompt;
+
+  /// No description provided for @caregiver_dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitoring Dashboard'**
+  String get caregiver_dashboard;
+
+  /// No description provided for @caregiver_dashboard_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ensuring loved ones stay on track with their health.'**
+  String get caregiver_dashboard_desc;
+
+  /// No description provided for @pending_invitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Invitations'**
+  String get pending_invitations;
+
+  /// No description provided for @your_patients.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Patients'**
+  String get your_patients;
+
+  /// No description provided for @no_patients_linked.
+  ///
+  /// In en, this message translates to:
+  /// **'No patients linked yet.'**
+  String get no_patients_linked;
+
+  /// No description provided for @invite_instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Patients can invite you using your email.'**
+  String get invite_instructions;
+
+  /// No description provided for @sharing_health_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Wants to share their health data'**
+  String get sharing_health_data;
+
+  /// No description provided for @adherence_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Adherence'**
+  String get adherence_label;
+
+  /// No description provided for @adherence_good.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get adherence_good;
+
+  /// No description provided for @health_academy_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Academy'**
+  String get health_academy_title;
+
+  /// No description provided for @insulin_pen_title.
+  ///
+  /// In en, this message translates to:
+  /// **'How to Use Insulin Pen'**
+  String get insulin_pen_title;
+
+  /// No description provided for @insulin_pen_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Official MOH guide on correct insulin injection technique.'**
+  String get insulin_pen_desc;
+
+  /// No description provided for @inhaler_technique_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Inhaler Technique (MDI)'**
+  String get inhaler_technique_title;
+
+  /// No description provided for @inhaler_technique_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use an inhaler for asthma correctly.'**
+  String get inhaler_technique_desc;
+
+  /// No description provided for @know_warfarin_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Know Your Warfarin'**
+  String get know_warfarin_title;
+
+  /// No description provided for @know_warfarin_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Contraindications and important info for heart patients.'**
+  String get know_warfarin_desc;
+
+  /// No description provided for @hypoglycemia_signs_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Signs of Hypoglycemia'**
+  String get hypoglycemia_signs_title;
+
+  /// No description provided for @hypoglycemia_signs_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do if your blood sugar is too low?'**
+  String get hypoglycemia_signs_desc;
+
+  /// No description provided for @official_missed_dose_protocol_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Official Missed Dose Protocol'**
+  String get official_missed_dose_protocol_title;
+
+  /// No description provided for @official_missed_dose_protocol_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do if you or the person you care for misses a dose.'**
+  String get official_missed_dose_protocol_desc;
+
+  /// No description provided for @know_your_medicine_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Know Your Medicine'**
+  String get know_your_medicine_title;
+
+  /// No description provided for @know_your_medicine_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'General tips for safe medication intake.'**
+  String get know_your_medicine_desc;
+
+  /// No description provided for @expert_clinical_analysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Expert Clinical Analysis'**
+  String get expert_clinical_analysis;
+
+  /// No description provided for @clinical_analysis_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-powered summary of your medication adherence and health vitals history.'**
+  String get clinical_analysis_desc;
+
+  /// No description provided for @precision_adherence_tracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Precision Adherence Tracking'**
+  String get precision_adherence_tracking;
+
+  /// No description provided for @health_vital_readings_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Vital Readings (BP, Sugar)'**
+  String get health_vital_readings_desc;
+
+  /// No description provided for @ai_clinician_insights.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Clinician Pattern Insights'**
+  String get ai_clinician_insights;
 }
 
 class _AppLocalizationsDelegate

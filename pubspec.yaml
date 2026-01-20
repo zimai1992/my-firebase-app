@@ -1,4 +1,3 @@
-
 name: myapp
 description: "A new Flutter project."
 publish_to: 'none'
@@ -31,7 +30,7 @@ dependencies:
   smooth_page_indicator: ^2.0.1
   package_info_plus: ^9.0.0
   in_app_review: ^2.0.8
-  url_launcher: ^6.3.0
+  url_launcher: ^6.3.2
   mobile_scanner: ^7.1.4
   permission_handler: ^12.0.1
   pdf: ^3.10.8
@@ -44,6 +43,7 @@ dependencies:
   speech_to_text: ^7.3.0
   shimmer: ^3.0.0
   vibration: ^3.1.5
+  share_plus: ^12.0.1
 
 dev_dependencies:
   flutter_test:
@@ -54,10 +54,24 @@ dev_dependencies:
   fake_async: ^1.3.1
   firebase_auth_mocks: ^0.15.1
   firebase_core_platform_interface: ^6.0.2
-
+  fake_cloud_firestore: ^4.0.1
+  # 👇 ADDED: This tool generates the app icons
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   generate: true
   uses-material-design: true
+  
+  # 👇 Your logo asset registration
   assets:
-    - assets/images/
+    - assets/images/rx_genie_logo.png
+
+# 👇 ADDED: Configuration for the App Icon Generator
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/rx_genie_logo.png"
+  min_sdk_android: 21
+  # Optional: If you want a specific background color (e.g., White)
+  # adaptive_icon_background: "#ffffff"
+  # adaptive_icon_foreground: "assets/images/rx_genie_logo.png"

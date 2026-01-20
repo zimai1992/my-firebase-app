@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/l10n/app_localizations.dart';
@@ -26,7 +25,8 @@ class PaywallScreenState extends State<PaywallScreen> {
   Future<void> _fetchOfferings() async {
     try {
       final offerings = await Purchases.getOfferings();
-      if (offerings.current != null && offerings.current!.availablePackages.isNotEmpty) {
+      if (offerings.current != null &&
+          offerings.current!.availablePackages.isNotEmpty) {
         setState(() {
           _packages = offerings.current!.availablePackages;
         });
@@ -104,16 +104,16 @@ class PaywallScreenState extends State<PaywallScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(_packages.length, (index) {
-          final package = _packages[index];
-          return _buildPriceCard(
-            localizations,
-            index,
-            package.storeProduct.title,
-            package.storeProduct.priceString,
-            package.storeProduct.description,
-            index == 1,
-          );
-        }),
+        final package = _packages[index];
+        return _buildPriceCard(
+          localizations,
+          index,
+          package.storeProduct.title,
+          package.storeProduct.priceString,
+          package.storeProduct.description,
+          index == 1,
+        );
+      }),
     );
   }
 
@@ -136,30 +136,36 @@ class PaywallScreenState extends State<PaywallScreen> {
   Widget _buildSubscribeButton(
       AppLocalizations localizations, SubscriptionService subscriptionService) {
     return ElevatedButton(
-      onPressed: _packages.isEmpty ? null : () async {
-        try {
-          // In 9.x, purchasePackage returns CustomerInfo, 
-          // but if it's returning PurchaseResult, we'll handle both.
-          final dynamic result = await Purchases.purchasePackage(_packages[_selectedPlanIndex]);
-          
-          final CustomerInfo customerInfo = (result is CustomerInfo) ? result : result.customerInfo;
-          
-          if (customerInfo.entitlements.all["premium"]?.isActive ?? false) {
-            subscriptionService.setPremium(true);
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(localizations.subscribed_to_premium)),
-            );
-            if (!mounted) return;
-            Navigator.of(context).pop();
-          }
-        } catch (e) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString())),
-          );
-        }
-      },
+      onPressed: _packages.isEmpty
+          ? null
+          : () async {
+              try {
+                // In 9.x, purchasePackage returns CustomerInfo,
+                // but if it's returning PurchaseResult, we'll handle both.
+                final dynamic result = await Purchases.purchasePackage(
+                    _packages[_selectedPlanIndex]);
+
+                final CustomerInfo customerInfo =
+                    (result is CustomerInfo) ? result : result.customerInfo;
+
+                if (customerInfo.entitlements.all["premium"]?.isActive ??
+                    false) {
+                  subscriptionService.setPremium(true);
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(localizations.subscribed_to_premium)),
+                  );
+                  if (!mounted) return;
+                  Navigator.of(context).pop();
+                }
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
+              }
+            },
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

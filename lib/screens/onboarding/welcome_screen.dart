@@ -21,7 +21,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: TexturedBackground(
         child: Stack(
@@ -34,27 +34,36 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               children: [
                 _buildPage(
                   title: 'Your Personal Health Assistant',
-                  subtitle: 'Never miss a dose again. Manage your medications with AI-powered ease.',
+                  subtitle:
+                      'Never miss a dose again. Manage your medications with AI-powered ease.',
                   icon: Icons.health_and_safety,
                   color: Colors.teal,
                 ),
                 _buildPage(
                   title: 'Setup Your First Medicine',
-                  subtitle: 'Let\'s get started by adding one medication you take regularly.',
+                  subtitle:
+                      'Let\'s get started by adding one medication you take regularly.',
                   icon: Icons.medication,
                   color: Colors.blue,
                   action: ElevatedButton(
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (c) => const AddMedicineScreen())),
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (c) => const AddMedicineScreen())),
                     child: const Text('Add My First Med'),
                   ),
                 ),
                 _buildPage(
                   title: 'Involve a Caregiver',
-                  subtitle: 'Add a family member or friend to help you stay on track.',
+                  subtitle:
+                      'Add a family member or friend to help you stay on track.',
                   icon: Icons.group_add,
                   color: Colors.orange,
                   action: ElevatedButton(
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (c) => const AddCaregiverScreen())),
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (c) => const AddCaregiverScreen())),
                     child: const Text('Invite a Caregiver'),
                   ),
                 ),
@@ -138,7 +147,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('hasSeenTour', true);
     if (mounted) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const LoginScreen()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (c) => const LoginScreen()));
     }
   }
 }

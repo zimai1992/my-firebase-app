@@ -21,7 +21,8 @@ void main() {
     await Firebase.initializeApp();
   });
 
-  testWidgets('App flow test: Onboarding to Login', (WidgetTester tester) async {
+  testWidgets('App flow test: Onboarding to Login',
+      (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({'hasSeenTour': false});
     final prefs = await SharedPreferences.getInstance();
 
@@ -36,7 +37,8 @@ void main() {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (context) => MedicineProvider(prefs, auth.currentUser)),
+          ChangeNotifierProvider(
+              create: (context) => MedicineProvider(prefs, auth.currentUser)),
           ChangeNotifierProvider(create: (context) => LocaleProvider()),
           ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ],
@@ -61,16 +63,17 @@ void main() {
     // 3. Tap Done/Skip to reach Home (since we mocked signedIn: true)
     await tester.tap(find.text('DONE'));
     await tester.pumpAndSettle();
-    
+
     // Check for Home screen indicators
-    expect(find.byIcon(Icons.mic_none), findsOneWidget); 
+    expect(find.byIcon(Icons.mic_none), findsOneWidget);
   });
 }
 
 void setupFirebaseAuthMocks() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const MethodChannel channel = MethodChannel('plugins.flutter.io/firebase_core');
+  const MethodChannel channel =
+      MethodChannel('plugins.flutter.io/firebase_core');
 
   channel.setMockMethodCallHandler((MethodCall methodCall) async {
     if (methodCall.method == 'Firebase#initializeApp') {

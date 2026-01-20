@@ -24,7 +24,8 @@ class AdherenceChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  if (value < 0 || value >= dataPoints.length) return const SizedBox();
+                  if (value < 0 || value >= dataPoints.length)
+                    return const SizedBox();
                   return Text(
                     dataPoints[value.toInt()].label,
                     style: const TextStyle(fontSize: 10, color: Colors.grey),
@@ -33,14 +34,21 @@ class AdherenceChart extends StatelessWidget {
                 reservedSize: 22,
               ),
             ),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
           borderData: FlBorderData(show: false),
           lineBarsData: [
             LineChartBarData(
-              spots: dataPoints.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.value)).toList(),
+              spots: dataPoints
+                  .asMap()
+                  .entries
+                  .map((e) => FlSpot(e.key.toDouble(), e.value.value))
+                  .toList(),
               isCurved: true,
               color: theme.colorScheme.primary,
               barWidth: 4,
@@ -61,7 +69,8 @@ class AdherenceChart extends StatelessWidget {
     final now = DateTime.now();
     return List.generate(7, (index) {
       final date = now.subtract(Duration(days: 6 - index));
-      final count = logs.where((log) => DateUtils.isSameDay(log.timestamp, date)).length;
+      final count =
+          logs.where((log) => DateUtils.isSameDay(log.timestamp, date)).length;
       // Mock percentage for chart display (count normalized to 0-10)
       return _ChartData(
         DateFormat('E').format(date),

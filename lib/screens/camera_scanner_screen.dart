@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart'; // Add this for kIsWeb
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/screens/add_medicine_screen.dart';
@@ -13,7 +14,7 @@ class CameraScannerScreen extends StatefulWidget {
 }
 
 class _CameraScannerScreenState extends State<CameraScannerScreen> {
-  File? _image;
+  XFile? _image;
   final ImagePicker _picker = ImagePicker();
   final GeminiService _geminiService = GeminiService();
   Map<String, String>? _extractedData;
@@ -23,7 +24,7 @@ class _CameraScannerScreenState extends State<CameraScannerScreen> {
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
     if (photo != null) {
       setState(() {
-        _image = File(photo.path);
+        _image = photo;
         _extractedData = null; // Clear previous data
       });
     }
@@ -37,18 +38,35 @@ class _CameraScannerScreenState extends State<CameraScannerScreen> {
     try {
       final response =
           await _geminiService.analyzeMedicine(await _image!.readAsBytes());
+      debugPrint('Gemini Response: $response'); // LOGGING
+
       final data = jsonDecode(response) as Map<String, dynamic>;
+
+      if (data.containsKey('error')) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification Failed: ${data['error']}')),
+        );
+        return;
+      }
+
       setState(() {
         _extractedData =
             data.map((key, value) => MapEntry(key, value.toString()));
       });
     } catch (e) {
-      // Handle error
-      debugPrint(e.toString());
+      debugPrint('Analysis Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -59,8 +77,14 @@ class _CameraScannerScreenState extends State<CameraScannerScreen> {
       MaterialPageRoute(
         builder: (context) => AddMedicineScreen(
           initialName: _extractedData!['name'],
+          initialGenericName: _extractedData!['generic_name'],
           initialDosage: _extractedData!['dosage'],
           initialFrequency: _extractedData!['frequency'],
+          initialSpecialInstructions: [
+            _extractedData!['special_instructions'],
+            _extractedData!['lifestyle_warnings'],
+            _extractedData!['recommendation_note']
+          ].where((s) => s != null && s.isNotEmpty && s != 'null').join('. '),
         ),
       ),
     );
@@ -74,12 +98,19 @@ class _CameraScannerScreenState extends State<CameraScannerScreen> {
         child: Column(
           children: [
             if (_image != null)
-              Image.file(
-                _image!,
-                height: 300,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              kIsWeb
+                  ? Image.network(
+                      _image!.path,
+                      height: 300,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.file(
+                      File(_image!.path),
+                      height: 300,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _takePicture,

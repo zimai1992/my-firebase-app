@@ -1,4 +1,4 @@
-
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -17,7 +17,8 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> init() async {
+  Future<void> init(
+      {void Function(NotificationResponse)? onNotificationResponse}) async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -28,9 +29,7 @@ class NotificationService {
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse details) {
-        // Handle action here if needed in main.dart or via a stream
-      },
+      onDidReceiveNotificationResponse: onNotificationResponse,
     );
     tz.initializeTimeZones();
   }
@@ -40,8 +39,9 @@ class NotificationService {
     for (int i = 0; i < medicine.times.length; i++) {
       final time = medicine.times[i];
       final now = DateTime.now();
-      var scheduledDate = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-      
+      var scheduledDate =
+          DateTime(now.year, now.month, now.day, time.hour, time.minute);
+
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
@@ -79,6 +79,7 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        payload: '${medicine.id}|${medicine.name}', // For action handlers
       );
     }
   }
@@ -118,5 +119,50 @@ class NotificationService {
     ));
     await flutterLocalNotificationsPlugin.show(
         id, title, body, notificationDetails);
+  }
+
+  Future<void> showMissedDoseAlert(Medicine medicine, dynamic time) async {
+    final String timeStr =
+        time is String ? time : (time as dynamic).format(null);
+    final bool isHighRisk = _isUnforgiving(medicine.name);
+
+    final String body = isHighRisk
+        ? 'CRITICAL: It is now too late to take this high-risk dose safely ($timeStr). Contact your doctor for guidance immediately.'
+        : 'It is now too late to take this dose safely ($timeStr). Please skip and wait for your next scheduled time.';
+
+    await flutterLocalNotificationsPlugin.show(
+      medicine.hashCode + 999, // Unique ID for missed alerts
+      isHighRisk ? '⚠️ HIGH-RISK MISSED DOSE' : 'MISSED DOSE: ${medicine.name}',
+      isHighRisk ? '${medicine.name}: $body' : body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'missed_dose_channel',
+          'Missed Dose Alerts',
+          channelDescription: 'Notifications for officially missed medications',
+          importance: Importance.max,
+          priority: Priority.high,
+          color: isHighRisk ? const Color(0xFFD32F2F) : const Color(0xFFFF5722),
+          styleInformation: BigTextStyleInformation(
+            isHighRisk ? '${medicine.name}: $body' : body,
+            contentTitle: isHighRisk
+                ? '⚠️ HIGH-RISK MISSED DOSE'
+                : 'MISSED DOSE: ${medicine.name}',
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _isUnforgiving(String medicineName) {
+    final name = medicineName.toLowerCase();
+    final unforgivingKeywords = [
+      'warfarin', 'rivaroxaban', 'edoxaban', 'apixaban', 'dabigatran', // Anticoagulants
+      'contraceptive', 'pill', 'desogestrel', // Contraceptives
+      'levodopa', 'sinemet', 'madopar', // Parkinson
+      'valproate', 'epilim', 'lamotrigine', 'lamictal', 'carbamazepine', // Epilepsy
+      'insulin', 'metformin', // Diabetes
+      'methotrexate', 'azathioprine', // Immunosuppressants
+    ];
+    return unforgivingKeywords.any((kw) => name.contains(kw));
   }
 }

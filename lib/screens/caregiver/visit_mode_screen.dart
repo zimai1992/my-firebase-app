@@ -39,40 +39,48 @@ class _VisitModeScreenState extends State<VisitModeScreen> {
           children: [
             _buildPatientHeader(theme),
             const SizedBox(height: 24),
-            const Text('Safety & Audit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text('Safety & Audit',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),
-            ...List.generate(_checklist.length, (index) => CheckboxListTile(
-              title: Text(_checklist[index], style: const TextStyle(fontSize: 14)),
-              value: _checkedItems.contains(index),
-              onChanged: (val) {
-                setState(() {
-                  if (val == true) {
-                    _checkedItems.add(index);
-                  } else {
-                    _checkedItems.remove(index);
-                  }
-                });
-              },
-              controlAffinity: ListTileControlAffinity.leading,
-            )),
+            ...List.generate(
+                _checklist.length,
+                (index) => CheckboxListTile(
+                      title: Text(_checklist[index],
+                          style: const TextStyle(fontSize: 14)),
+                      value: _checkedItems.contains(index),
+                      onChanged: (val) {
+                        setState(() {
+                          if (val == true) {
+                            _checkedItems.add(index);
+                          } else {
+                            _checkedItems.remove(index);
+                          }
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                    )),
             const SizedBox(height: 24),
-            const Text('Patient Wellness', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text('Patient Wellness',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),
             CustomCard(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: ['Great', 'Good', 'Tired', 'Pain'].map((m) => ChoiceChip(
-                    label: Text(m),
-                    selected: _mood == m,
-                    onSelected: (s) => setState(() => _mood = m),
-                  )).toList(),
+                  children: ['Great', 'Good', 'Tired', 'Pain']
+                      .map((m) => ChoiceChip(
+                            label: Text(m),
+                            selected: _mood == m,
+                            onSelected: (s) => setState(() => _mood = m),
+                          ))
+                      .toList(),
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            const Text('Visit Notes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text('Visit Notes',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),
             TextField(
               controller: _notesController,
@@ -89,7 +97,8 @@ class _VisitModeScreenState extends State<VisitModeScreen> {
                 minimumSize: const Size(double.infinity, 56),
                 backgroundColor: theme.colorScheme.primary,
               ),
-              child: const Text('Complete Visit Log', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text('Complete Visit Log',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -109,8 +118,10 @@ class _VisitModeScreenState extends State<VisitModeScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.patient.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const Text('Physical Wellness Check-in', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(widget.patient.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Physical Wellness Check-in',
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
               ],
             ),
           ],
@@ -136,7 +147,8 @@ class _VisitModeScreenState extends State<VisitModeScreen> {
         .add(visitData);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Visit log saved.')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Visit log saved.')));
       Navigator.pop(context);
     }
   }

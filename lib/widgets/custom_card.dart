@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class CustomCard extends StatelessWidget {
@@ -7,6 +8,9 @@ class CustomCard extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final Color? color;
   final BoxBorder? border;
+  final Gradient? gradient;
+  final double? borderRadius;
+  final bool isGlass;
 
   const CustomCard({
     super.key,
@@ -16,33 +20,79 @@ class CustomCard extends StatelessWidget {
     this.padding,
     this.color,
     this.border,
+    this.gradient,
+    this.borderRadius,
+    this.isGlass = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final double r = borderRadius ?? 24;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: margin ?? const EdgeInsets.symmetric(vertical: 8.0),
-        padding: padding,
-        decoration: BoxDecoration(
-          color: color ?? Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: border,
-          boxShadow: [
-            BoxShadow(
-              color: isDarkMode
-                  ? Colors.black.withAlpha((0.3 * 255).toInt())
-                  : Colors.grey.withAlpha((0.1 * 255).toInt()),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+    Widget cardContent = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      margin: margin ?? const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      padding: padding,
+      decoration: BoxDecoration(
+        color: color ??
+            (isGlass
+                ? (isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.6))
+                : theme.cardTheme.color),
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(r),
+        border: border ??
+            Border.all(
+              color: isGlass
+                  ? (isDarkMode ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.4))
+                  : (isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.0)),
+              width: 1,
             ),
-          ],
-        ),
-        child: child,
+        boxShadow: isGlass
+            ? [] // Glass usually flat or subtle
+            : [
+                BoxShadow(
+                  color: isDarkMode ? Colors.black.withOpacity(0.3) : const Color(0xFF6366F1).withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                  spreadRadius: -4,
+                ),
+                BoxShadow(
+                  color: isDarkMode ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                  spreadRadius: -2,
+                ),
+              ],
       ),
+      child: child,
     );
+
+    if (isGlass) {
+      // Glassmorphism wrapper
+      cardContent = ClipRRect(
+        borderRadius: BorderRadius.circular(r),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: cardContent,
+        ),
+      );
+    } else {
+      // Standard clipping
+      cardContent = ClipRRect(
+        borderRadius: BorderRadius.circular(r),
+        child: cardContent,
+      );
+    }
+
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: onTap,
+        child: cardContent,
+      );
+    }
+
+    return cardContent;
   }
 }

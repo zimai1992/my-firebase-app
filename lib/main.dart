@@ -14,11 +14,16 @@ import './screens/onboarding/welcome_screen.dart';
 import './services/notification_service.dart';
 import './services/subscription_service.dart';
 import 'firebase_options.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 import 'dart:developer' as developer;
+
+// Global navigator key for notification callbacks
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     final prefs = await SharedPreferences.getInstance();
     final bool hasSeenTour = prefs.getBool('hasSeenTour') ?? false;
@@ -29,7 +34,68 @@ void main() async {
 
     // Initialize Notification Service
     final notificationService = NotificationService();
-    await notificationService.init();
+    await notificationService.init(
+      onNotificationResponse: (NotificationResponse details) async {
+        developer.log(
+            'Notification action: ${details.actionId}, payload: ${details.payload}');
+
+        // Handle action IDs
+        if (details.actionId == 'mark_taken') {
+          // Payload format: "medicineId|medicineName"
+          if (details.payload != null) {
+            final parts = details.payload!.split('|');
+            if (parts.length >= 2) {
+              final medicineId = parts[0];
+              final medicineName = parts[1];
+
+              // Try to access context and mark as taken
+              final context = navigatorKey.currentContext;
+              if (context != null) {
+                try {
+                  final provider =
+                      Provider.of<MedicineProvider>(context, listen: false);
+                  final medicine =
+                      provider.medicines.firstWhere((m) => m.id == medicineId);
+                  await provider.logMedicine(medicine);
+
+                  // Show success snackbar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('✓ $medicineName logged!'),
+                        backgroundColor: Colors.green),
+                  );
+                } catch (e) {
+                  developer.log('Error logging medicine from notification',
+                      error: e);
+                }
+              }
+            }
+          }
+        } else if (details.actionId == 'snooze') {
+          // Reschedule notification for +10 minutes
+          if (details.id != null) {
+            final snoozeTime = DateTime.now().add(const Duration(minutes: 10));
+            await notificationService.flutterLocalNotificationsPlugin
+                .zonedSchedule(
+              details.id!,
+              'Medicine Reminder (Snoozed)',
+              'Time to take your medicine',
+              tz.TZDateTime.from(snoozeTime, tz.local),
+              const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  'medicine_reminders',
+                  'Medicine Reminders',
+                  channelDescription: 'Snoozed reminders',
+                  importance: Importance.max,
+                  priority: Priority.high,
+                ),
+              ),
+              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            );
+          }
+        }
+      },
+    );
 
     // Initialize Subscription Service
     final subscriptionService = SubscriptionService();
@@ -55,7 +121,8 @@ void main() async {
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Text('Failed to initialize app. Please check your connection and try again.\n\nError: $e'),
+            child: Text(
+                'Failed to initialize app. Please check your connection and try again.\n\nError: $e'),
           ),
         ),
       ),
@@ -89,11 +156,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final medicineProvider = Provider.of<MedicineProvider>(context);
+    final bool isImmortal = medicineProvider.isImmortal;
 
     return MaterialApp(
-      title: 'Medicine Reminder',
-      theme: lightTheme,
-      darkTheme: darkTheme,
+      navigatorKey: navigatorKey,
+      title: 'Rx Genie',
+      theme: isImmortal ? lightImmortalTheme : lightTheme,
+      darkTheme: isImmortal ? darkImmortalTheme : darkTheme,
       themeMode: themeProvider.themeMode,
       locale: localeProvider.locale,
       localizationsDelegates: const [
@@ -127,11 +197,11 @@ class AuthWrapper extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (!hasSeenTour) {
-          return const WelcomeScreen();
-        }
         if (snapshot.hasData) {
           return const HomeScreen();
+        }
+        if (!hasSeenTour) {
+          return const WelcomeScreen();
         }
         return const LoginScreen();
       },

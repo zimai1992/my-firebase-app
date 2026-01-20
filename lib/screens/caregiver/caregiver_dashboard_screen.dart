@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/models/invitation.dart';
@@ -10,7 +11,14 @@ import 'package:myapp/widgets/animated_fade_in.dart';
 import 'dart:developer' as developer;
 
 class CaregiverDashboardScreen extends StatefulWidget {
-  const CaregiverDashboardScreen({super.key});
+  final FirebaseAuth? auth;
+  final FirebaseFirestore? firestore;
+
+  const CaregiverDashboardScreen({
+    super.key,
+    this.auth,
+    this.firestore,
+  });
 
   @override
   State<CaregiverDashboardScreen> createState() =>
@@ -18,8 +26,8 @@ class CaregiverDashboardScreen extends StatefulWidget {
 }
 
 class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final FirebaseFirestore _firestore;
+  late final FirebaseAuth _auth;
   User? _currentUser;
 
   Stream<List<Invitation>>? _invitationsStream;
@@ -28,6 +36,8 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _firestore = widget.firestore ?? FirebaseFirestore.instance;
+    _auth = widget.auth ?? FirebaseAuth.instance;
     _currentUser = _auth.currentUser;
     if (_currentUser != null) {
       _initializeStreams();
@@ -105,13 +115,13 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: TexturedBackground(
         child: CustomScrollView(
           slivers: [
             SliverAppBar.large(
-              title: const Text('Caregiver Hub'),
+              title: Text(AppLocalizations.of(context)!.caregiver_hub_title),
               backgroundColor: Colors.transparent,
               elevation: 0,
               actions: [
@@ -122,22 +132,25 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
               ],
             ),
             if (_currentUser == null)
-              const SliverFillRemaining(
-                child: Center(child: Text('Please login to continue.')),
+              SliverFillRemaining(
+                child: Center(child: Text(AppLocalizations.of(context)!.caregiver_login_prompt)),
               )
             else
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    _buildSummaryCard(theme),
+                    _buildSummaryCard(context, theme),
                     const SizedBox(height: 24),
-                    _buildSectionHeader(context, 'Pending Invitations', Icons.person_add_outlined),
+                    _buildSectionHeader(context, AppLocalizations.of(context)!.pending_invitations,
+                        Icons.person_add_outlined),
                     _buildInvitationsList(),
                     const SizedBox(height: 24),
-                    _buildSectionHeader(context, 'Your Patients', Icons.health_and_safety_outlined),
+                    _buildSectionHeader(context, AppLocalizations.of(context)!.your_patients,
+                        Icons.health_and_safety_outlined),
                     _buildPatientsList(),
-                    const SizedBox(height: 100), // Space for FAB or bottom padding
+                    const SizedBox(
+                        height: 100), // Space for FAB or bottom padding
                   ]),
                 ),
               ),
@@ -147,7 +160,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
     );
   }
 
-  Widget _buildSummaryCard(ThemeData theme) {
+  Widget _buildSummaryCard(BuildContext context, ThemeData theme) {
     return AnimatedFadeIn(
       child: CustomCard(
         color: theme.colorScheme.primaryContainer,
@@ -158,7 +171,8 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
               CircleAvatar(
                 radius: 30,
                 backgroundColor: theme.colorScheme.primary,
-                child: const Icon(Icons.medical_services, color: Colors.white, size: 30),
+                child: const Icon(Icons.medical_services,
+                    color: Colors.white, size: 30),
               ),
               const SizedBox(width: 20),
               Expanded(
@@ -166,7 +180,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Monitoring Dashboard',
+                      AppLocalizations.of(context)!.caregiver_dashboard,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.onPrimaryContainer,
@@ -174,9 +188,10 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Ensuring loved ones stay on track with their health.',
+                      AppLocalizations.of(context)!.caregiver_dashboard_desc,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer.withAlpha((0.8 * 255).toInt()),
+                        color: theme.colorScheme.onPrimaryContainer
+                            .withAlpha((0.8 * 255).toInt()),
                       ),
                     ),
                   ],
@@ -189,7 +204,8 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+  Widget _buildSectionHeader(
+      BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
@@ -214,7 +230,8 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
       stream: _invitationsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: Padding(
+          return const Center(
+              child: Padding(
             padding: EdgeInsets.all(20.0),
             child: CircularProgressIndicator(),
           ));
@@ -224,13 +241,15 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
           return const SizedBox.shrink();
         }
         return Column(
-          children: invitations.map((inv) => AnimatedFadeIn(
-            child: InvitationCard(
-              invitation: inv,
-              onAccept: () => _updateInvitationStatus(inv, 'accepted'),
-              onDecline: () => _updateInvitationStatus(inv, 'declined'),
-            ),
-          )).toList(),
+          children: invitations
+              .map((inv) => AnimatedFadeIn(
+                    child: InvitationCard(
+                      invitation: inv,
+                      onAccept: () => _updateInvitationStatus(inv, 'accepted'),
+                      onDecline: () => _updateInvitationStatus(inv, 'declined'),
+                    ),
+                  ))
+              .toList(),
         );
       },
     );
@@ -241,7 +260,8 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
       stream: _patientsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: Padding(
+          return const Center(
+              child: Padding(
             padding: EdgeInsets.all(20.0),
             child: CircularProgressIndicator(),
           ));
@@ -251,17 +271,20 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
           return _buildEmptyState();
         }
         return Column(
-          children: patients.map((patient) => AnimatedFadeIn(
-            child: PatientCard(
-              patient: patient,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PatientDetailsScreen(patient: patient),
-                ),
-              ),
-            ),
-          )).toList(),
+          children: patients
+              .map((patient) => AnimatedFadeIn(
+                    child: PatientCard(
+                      patient: patient,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PatientDetailsScreen(patient: patient),
+                        ),
+                      ),
+                    ),
+                  ))
+              .toList(),
         );
       },
     );
@@ -274,15 +297,15 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
         children: [
           Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
-          const Text(
-            'No patients linked yet.',
-            style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
+          Text(
+            AppLocalizations.of(context)!.no_patients_linked,
+            style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Patients can invite you using your email.',
+          Text(
+            AppLocalizations.of(context)!.invite_instructions,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
         ],
       ),
@@ -320,21 +343,25 @@ class InvitationCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(invitation.patientName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const Text('Wants to share their health data', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(invitation.patientName,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(AppLocalizations.of(context)!.sharing_health_data,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 ],
               ),
             ),
             IconButton(
               onPressed: onDecline,
               icon: const Icon(Icons.close, color: Colors.red),
-              style: IconButton.styleFrom(backgroundColor: Colors.red.withAlpha((0.1 * 255).toInt())),
+              style: IconButton.styleFrom(
+                  backgroundColor: Colors.red.withAlpha((0.1 * 255).toInt())),
             ),
             const SizedBox(width: 8),
             IconButton(
               onPressed: onAccept,
               icon: const Icon(Icons.check, color: Colors.green),
-              style: IconButton.styleFrom(backgroundColor: Colors.green.withAlpha((0.1 * 255).toInt())),
+              style: IconButton.styleFrom(
+                  backgroundColor: Colors.green.withAlpha((0.1 * 255).toInt())),
             ),
           ],
         ),
@@ -365,22 +392,27 @@ class PatientCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(patient.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(patient.email, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(patient.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(patient.email,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const Text('Adherence', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                Text('Good', style: TextStyle(
-                  color: Colors.green[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                )),
-              ],
-            ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(AppLocalizations.of(context)!.adherence_label,
+                      style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                  Text(AppLocalizations.of(context)!.adherence_good,
+                      style: TextStyle(
+                        color: Colors.green[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      )),
+                ],
+              ),
             const SizedBox(width: 8),
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],
